@@ -1,50 +1,67 @@
-import type { HttpContext } from '@adonisjs/core/http'
-import Comment from '../models/comment.js'
-import Post from '../models/post.js'
+import type { HttpContext } from '@adonisjs/core/http';
+import Comment from '../models/comment.js';
+import Post from '#models/post';
 
 export default class CommentsController {
-  public async store({ request, response }: HttpContext) {
-    const { userId, postId, content } = request.only(['userId', 'postId', 'content'])
+  public async store({ request, auth, response }: HttpContext) {
+    const user = auth.user!;
+    const { postId, content } = request.only(['postId', 'content']);
 
-    const post = await Post.find(postId)
-    if (!post) {
-      return response.notFound({ message: 'Post not found' })
+    if (!content) {
+      return response.badRequest({ message: 'Content is required' });
     }
 
-    const comment = new Comment()
-    comment.userId = userId
-    comment.postId = postId
-    comment.content = content
-    await comment.save()
+    const comment = await Comment.create({
+      content,
+      postId,
+      userId: user.id,
+    });
 
-    return response.created({ message: 'Comment created successfully', data: comment })
+    await comment.load('user');
+
+    return response.created({ message: 'Comment created successfully', data: comment });
   }
 
-  public async index({ response }: HttpContext) {
-    const comments = await Comment.all()
-    return response.ok({ data: comments })
+  public async index({ params, response }: HttpContext) {
+    const postId = params.postId;
+    const comments = await Comment.query().where('postId', postId).preload('user');
+    return response.ok({ data: comments });
   }
 
-  public async update({ request, response, params }: HttpContext) {
-    const comment = await Comment.find(params.id)
+  public async update({ request, response, params, auth }: HttpContext) {
+    const user = auth.user!;
+    const comment = await Comment.find(params.id);
+
     if (!comment) {
-      return response.notFound({ message: 'Comment not found' })
+      return response.notFound({ message: 'Comment not found' });
     }
 
-    comment.merge(request.only(['content']))
-    await comment.save()
+    if (comment.userId !== user.id) {
+      return response.unauthorized({ message: 'You are not allowed to update this comment' });
+    }
 
-    return response.ok({ message: 'Comment updated successfully', data: comment })
+    comment.merge(request.only(['content']));
+    await comment.save();
+
+    return response.ok({ message: 'Comment updated successfully', data: comment });
   }
 
-  public async destroy({ response, params }: HttpContext) {
-    const comment = await Comment.find(params.id)
+  public async destroy({ auth, params, response }: HttpContext) {
+    const user = auth.user!;
+    const comment = await Comment.find(params.id);
+
     if (!comment) {
-      return response.notFound({ message: 'Comment not found' })
+      return response.notFound({ message: 'Comment not found' });
     }
 
-    await comment.delete()
+    const post = await Post.find(comment.postId);
+    if (comment.userId !== user.id && post?.userId !== user.id) {
+      return response.unauthorized({ message: 'You are not allowed to delete this comment' });
+    }
 
-    return response.ok({ message: 'Comment deleted successfully' })
+    await comment.delete();
+
+    return response.ok({ message: 'Comment deleted successfully' });
   }
+
 }

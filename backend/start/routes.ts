@@ -45,6 +45,16 @@ router.group(() => {
     .use(middleware.auth())
 
   router
+    .put('/password/:id', [UsersController, 'updatePassword'])
+    .as('users.updatePassword')
+    .use(middleware.auth())
+
+  router
+    .post('/profile-picture/:id', [UsersController, 'updateProfilePicture'])
+    .as('users.updateProfilePicture')
+    .use(middleware.auth())
+
+  router
     .delete('/:id', [UsersController, 'destroy'])
     .as('users.destroy')
     .use(middleware.auth())
@@ -57,6 +67,7 @@ router.group(() => {
   router
     .get('/', [PostsController, 'index'])
     .as('posts.index')
+    .use(middleware.auth())
 
   router
     .post('/', [PostsController, 'store'])
@@ -66,6 +77,7 @@ router.group(() => {
   router
     .get('/:id', [PostsController, 'show'])
     .as('posts.show')
+    .use(middleware.auth())
 
   router
     .put('/:id', [PostsController, 'update'])
@@ -83,8 +95,9 @@ router.group(() => {
 // COMMENT ROUTES
 router.group(() => {
   router
-    .get('/', [CommentsController, 'index'])
+    .get('/:postId', [CommentsController, 'index'])
     .as('comments.index')
+    .use(middleware.auth())
 
   router
     .post('/', [CommentsController, 'store'])
@@ -104,11 +117,17 @@ router.group(() => {
   .prefix('/comments')
   .as('comments')
 
+
 // FOLLOWER ROUTES
 router.group(() => {
   router
     .post('/follow', [FollowersController, 'follow'])
     .as('followers.follow')
+    .use(middleware.auth())
+
+  router
+    .get('/following', [FollowersController, 'following'])
+    .as('followers.following')
     .use(middleware.auth())
 
   router
@@ -119,6 +138,7 @@ router.group(() => {
   router
     .get('/:id', [FollowersController, 'index'])
     .as('followers.index')
+    .use(middleware.auth())
 })
   .prefix('/followers')
   .as('followers')

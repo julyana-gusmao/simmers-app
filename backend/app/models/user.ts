@@ -2,8 +2,11 @@ import { DbAccessTokensProvider } from '@adonisjs/auth/access_tokens'
 import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
 import { compose } from '@adonisjs/core/helpers'
 import hash from '@adonisjs/core/services/hash'
-import { BaseModel, column } from '@adonisjs/lucid/orm'
+import { BaseModel, column, hasMany } from '@adonisjs/lucid/orm'
 import { DateTime } from 'luxon'
+import Post from './post.js'
+import Follower from './follower.js'
+import type { HasMany } from '@adonisjs/lucid/types/relations'
 
 const AuthFinder = withAuthFinder(() => hash.use('bcrypt'), {
   uids: ['email'],
@@ -12,31 +15,48 @@ const AuthFinder = withAuthFinder(() => hash.use('bcrypt'), {
 
 export default class User extends compose(BaseModel, AuthFinder) {
   @column({ isPrimary: true })
-  declare id: number
+  public id: number
 
   @column()
-  declare firstName: string
+  public firstName: string
 
   @column()
-  declare lastName: string
+  public lastName: string
 
   @column()
-  declare birthDate: string
+  public birthDate: string
 
   @column()
-  declare phone: string
+  public phone: string
 
   @column()
-  declare email: string
+  public email: string
 
   @column({ serializeAs: null })
-  declare password: string
+  public password: string
+
+  @column()
+  public profilePicture: string | null
 
   @column.dateTime({ autoCreate: true })
-  declare createdAt: DateTime
+  public createdAt: DateTime
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime | null
+  public updatedAt: DateTime | null
 
-  static accessTokens = DbAccessTokensProvider.forModel(User)
+  @hasMany(() => Post)
+  public posts: HasMany<typeof Post>
+
+  @hasMany(() => Follower, { foreignKey: 'userId' })
+  public followers: HasMany<typeof Follower>
+
+  @hasMany(() => Follower, { foreignKey: 'followerId' })
+  public following: HasMany<typeof Follower>
+
+  static accessTokens = DbAccessTokensProvider.forModel(User, {
+    expiresIn: '30 days',
+    prefix: 'oat_',
+    table: 'auth_access_tokens',
+    type: 'auth_token',
+  })
 }

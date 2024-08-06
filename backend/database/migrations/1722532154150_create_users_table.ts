@@ -1,6 +1,6 @@
 import { BaseSchema } from '@adonisjs/lucid/schema'
 
-export default class extends BaseSchema {
+export default class UsersSchema extends BaseSchema {
   protected tableName = 'users'
 
   async up() {
@@ -12,6 +12,7 @@ export default class extends BaseSchema {
       table.string('phone').notNullable()
       table.string('email').notNullable().unique()
       table.string('password').notNullable()
+      table.string('profile_picture').nullable()
       table.timestamp('created_at', { useTz: true }).notNullable()
       table.timestamp('updated_at', { useTz: true }).notNullable()
     })
