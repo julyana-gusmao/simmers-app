@@ -22,9 +22,19 @@ export default class CommentsController {
     return response.created({ message: 'Comment created successfully', data: comment });
   }
 
-  public async index({ params, response }: HttpContext) {
+  public async index({ params, request, response }: HttpContext) {
     const postId = params.postId;
-    const comments = await Comment.query().where('postId', postId).preload('user');
+    const page = request.input('page', 1);
+    const limit = request.input('limit', 5);
+    const offset = (page - 1) * limit;
+
+    const comments = await Comment.query()
+      .where('postId', postId)
+      .preload('user')
+      .offset(offset)
+      .limit(limit)
+      .orderBy('createdAt', 'desc');
+
     return response.ok({ data: comments });
   }
 

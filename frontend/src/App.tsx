@@ -2,12 +2,12 @@ import ProfilePage from 'pages/ProfilePage';
 import React from 'react';
 import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import EditProfilePage from './pages/EditProfilePage';
 import Home from './pages/Home';
-import Login from './pages/Login';
+import Login from './pages/Auth/Login';
 import PostDetails from './pages/PostDetails';
-import SignUp from './pages/SignUp';
-import UsersPage from './pages/UsersPage';
+import ExplorerPage from './pages/ExplorerPage';
+import EditProfilePage from 'pages/Auth/EditProfilePage';
+import Register from 'pages/Auth/Register';
 
 const App: React.FC = () => {
   return (
@@ -15,9 +15,9 @@ const App: React.FC = () => {
       <Router>
         <Routes>
           <Route path="/login" element={<RedirectIfLogged><Login /></RedirectIfLogged>} />
-          <Route path="/signup" element={<RedirectIfLogged><SignUp /></RedirectIfLogged>} />
+          <Route path="/signup" element={<RedirectIfLogged><Register /></RedirectIfLogged>} />
           <Route path="/" element={<PrivateRoute><Home /></PrivateRoute>} />
-          <Route path="/users" element={<PrivateRoute><UsersPage /></PrivateRoute>} />
+          <Route path="/users" element={<PrivateRoute><ExplorerPage /></PrivateRoute>} />
           <Route path="/users/:id" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
           <Route path="/posts/:id" element={<PrivateRoute><PostDetails /></PrivateRoute>} />
           <Route path="/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />

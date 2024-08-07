@@ -1,9 +1,0 @@
-diff a/frontend/src/index.tsx b/frontend/src/index.tsx	(rejected hunks)
-@@ -1,6 +1,6 @@
- import React from 'react';
- import ReactDOM from 'react-dom/client';
--import './index.css';
-+import './globals.css';
- import App from './App';
- import reportWebVitals from './reportWebVitals';
- 

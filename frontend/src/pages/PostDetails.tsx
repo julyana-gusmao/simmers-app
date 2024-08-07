@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import CommentForm from '../components/comments/Form';
 import CommentsList from '../components/comments/List';
-import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
 
 interface Post {
@@ -19,8 +18,8 @@ interface Post {
 
 const PostDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [post, setPost] = useState<Post | null>(null);
-  const { user } = useAuth();
   const [loading, setLoading] = useState<boolean>(true);
   const [updateComments, setUpdateComments] = useState<boolean>(false);
 
@@ -53,6 +52,12 @@ const PostDetails: React.FC = () => {
 
   return (
     <div className='w-[60vw] m-auto bg-white p-3 border border-black rounded-md'>
+      <button
+        className="mb-4 p-2 bg-gray-500 text-white rounded"
+        onClick={() => navigate(-1)}
+      >
+        Voltar
+      </button>
       <div className='border border-black/30 p-5 flex flex-col gap-5 rounded-md mb-6'>
         <div className="post-header flex gap-3 items-center">
           <img

@@ -40,6 +40,10 @@ router.group(() => {
     .as('users.show')
 
   router
+    .get('/:id/posts', [UsersController, 'getUserPosts'])
+    .as('users.posts')
+
+  router
     .put('/:id', [UsersController, 'update'])
     .as('users.update')
     .use(middleware.auth())
@@ -68,7 +72,7 @@ router.group(() => {
     .get('/', [PostsController, 'index'])
     .as('posts.index')
     .use(middleware.auth())
-      
+
   router
     .get('/all', [PostsController, 'getAllPosts'])
     .as('posts.all')

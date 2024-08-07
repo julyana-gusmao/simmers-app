@@ -20,7 +20,7 @@ const PostForm: React.FC<PostFormProps> = ({ onPostCreated }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className='flex flex-col gap-5 border-2 border-lightGreen items-center p-4'>
+    <form onSubmit={handleSubmit} className='flex flex-col gap-5 border-2 rounded-xl bg-mediumGreen items-center p-4'>
       <textarea
         className='w-[40vw] min-h-[12vh] p-3'
         value={content}
@@ -28,7 +28,7 @@ const PostForm: React.FC<PostFormProps> = ({ onPostCreated }) => {
         placeholder="Conte algo legal..."
         maxLength={500}
       />
-      <button type="submit" className='btn-primary w-[200px]'>Postar</button>
+      <button type="submit" className='btn-secondary w-[200px]'>Postar</button>
     </form>
   );
 };

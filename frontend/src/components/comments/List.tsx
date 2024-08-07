@@ -26,21 +26,41 @@ const CommentsList: React.FC<CommentsListProps> = ({ postId, updateComments, pos
   const [comments, setComments] = useState<Comment[]>([]);
   const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
   const [editedContent, setEditedContent] = useState<string>('');
+  const [page, setPage] = useState<number>(1);
+  const [hasMoreComments, setHasMoreComments] = useState<boolean>(true);
   const { user } = useAuth();
 
-  const fetchComments = async () => {
+  const fetchComments = async (pageNumber = 1, reset = false) => {
     try {
-      const response = await api.get(`/comments/${postId}`);
-      setComments(response.data.data);
+      const response = await api.get(`/comments/${postId}?page=${pageNumber}&limit=5`);
+      if (response.data.data.length < 5) {
+        setHasMoreComments(false);
+      } else {
+        setHasMoreComments(true);
+      }
+      setComments((prevComments) => reset ? response.data.data : [...prevComments, ...response.data.data]);
     } catch (error) {
       console.error('Erro ao buscar comentários:', error);
     }
   };
 
+  useEffect(() => {
+    setComments([]);
+    setPage(1);
+    setHasMoreComments(true);
+    fetchComments(1, true);
+  }, [postId, updateComments]);
+
+  const handleLoadMore = () => {
+    const nextPage = page + 1;
+    setPage(nextPage);
+    fetchComments(nextPage);
+  };
+
   const handleDelete = async (commentId: number) => {
     try {
       await api.delete(`/comments/${commentId}`);
-      fetchComments();
+      setComments(comments.filter((comment) => comment.id !== commentId));
     } catch (error) {
       console.error('Erro ao deletar comentário:', error);
     }
@@ -49,16 +69,12 @@ const CommentsList: React.FC<CommentsListProps> = ({ postId, updateComments, pos
   const handleEditComment = async (commentId: number) => {
     try {
       await api.put(`/comments/${commentId}`, { content: editedContent });
-      fetchComments();
+      setComments(comments.map((comment) => (comment.id === commentId ? { ...comment, content: editedContent } : comment)));
       setEditingCommentId(null);
     } catch (error) {
       console.error('Erro ao editar comentário:', error);
     }
   };
-
-  useEffect(() => {
-    fetchComments();
-  }, [postId, updateComments]);
 
   if (!comments.length) {
     return <p>Não há comentários para este post.</p>;
@@ -100,6 +116,11 @@ const CommentsList: React.FC<CommentsListProps> = ({ postId, updateComments, pos
           )}
         </div>
       ))}
+      {hasMoreComments && comments.length % 5 === 0 && (
+        <div className="flex justify-center">
+          <button onClick={handleLoadMore} className="p-2 bg-blue-500 text-white rounded">Carregar mais</button>
+        </div>
+      )}
     </div>
   );
 };

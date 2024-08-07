@@ -3,40 +3,38 @@ import type { HttpContext } from '@adonisjs/core/http'
 import Post from '../models/post.js'
 
 export default class PostsController {
-  public async index({ auth, response }: HttpContext) {
+  public async index({ auth, request, response }: HttpContext) {
     const user = auth.user!
-
-    const userPosts = await Post.query()
-      .where('userId', user.id)
-      .preload('user')
-      .withCount('comments')
+    const page = request.input('page', 1)
+    const limit = request.input('limit', 5)
+    const offset = (page - 1) * limit
 
     const following = await Follower.query()
-    .where('followerId', user.id)
-    .select('userId')
+      .where('followerId', user.id)
+      .select('userId')
 
     const followingIds = following.map((follow) => follow.userId)
-    let followingPosts: Post[] = []
 
-    if (followingIds.length > 0) {
-      followingPosts = await Post.query()
-        .whereIn('userId', followingIds)
-        .preload('user', (userQuery) => {
-          userQuery.select(
-            'id', 
-            'firstName', 
-            'lastName', 
-            'profilePicture')
-        })
-        .withCount('comments')
-        .orderBy('createdAt', 'desc')
-    }
+    followingIds.push(user.id)
 
-    const posts = [...userPosts, ...followingPosts].sort((a, b) => {
-      return new Date(b.createdAt.toString()).getTime() - new Date(a.createdAt.toString()).getTime()
-    })
+    const posts = await Post.query()
+      .whereIn('userId', followingIds)
+      .preload('user', (userQuery) => {
+        userQuery.select('id', 'firstName', 'lastName', 'profilePicture')
+      })
+      .withCount('comments')
+      .orderBy('createdAt', 'desc')
+      .offset(offset)
+      .limit(limit)
 
-    return response.ok(posts)
+    const totalPostsResult = await Post.query()
+      .whereIn('userId', followingIds)
+      .count('* as total')
+
+    const totalPosts = totalPostsResult[0].$extras.total
+    const totalPages = Math.ceil(totalPosts / limit)
+
+    return response.ok({ data: posts, total: totalPosts, totalPages, page })
   }
 
   public async store({ auth, request, response }: HttpContext) {
@@ -72,19 +70,25 @@ export default class PostsController {
     return response.ok(post)
   }
 
-  public async getAllPosts({ auth, response }: HttpContext) {
+  public async getAllPosts({ auth, request, response }: HttpContext) {
     if (!auth.isAuthenticated) {
       return response.unauthorized({ message: 'User not authenticated' })
     }
 
-    const posts = await Post.query()
-        .preload('user', (userQuery) => {
-          userQuery.select('id', 'firstName', 'lastName', 'profilePicture')
-        })
-        .withCount('comments')
-        .orderBy('createdAt', 'desc')
+    const page = request.input('page', 1)
+    const limit = request.input('limit', 10)
+    const offset = (page - 1) * limit
 
-      return response.ok(posts)
+    const posts = await Post.query()
+      .preload('user', (userQuery) => {
+        userQuery.select('id', 'firstName', 'lastName', 'profilePicture')
+      })
+      .withCount('comments')
+      .orderBy('createdAt', 'desc')
+      .offset(offset)
+      .limit(limit)
+
+    return response.ok(posts)
   }
 
   public async update({ params, request, response, auth }: HttpContext) {

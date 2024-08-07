@@ -18,6 +18,23 @@ export default class UsersController {
     return response.ok(users);
   }
 
+  public async getUserPosts({ params, request, response }: HttpContext) {
+    const userId = params.id;
+    const page = request.input('page', 1);
+    const limit = request.input('limit', 5);
+    const offset = (page - 1) * limit;
+  
+    const posts = await Post.query()
+      .where('user_id', userId)
+      .preload('user')
+      .withCount('comments')
+      .orderBy('createdAt', 'desc')
+      .offset(offset)
+      .limit(limit);
+  
+    return response.ok(posts);
+  }
+
   public async show({ params, response }: HttpContext) {
     try {
       const user = await User.query()

@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
+import PostList from '@components/posts/List';
+import arrowBack from '@utils/arrow-back.svg';
 
 interface User {
   id: number;
@@ -11,27 +13,17 @@ interface User {
   profilePicture: string | null;
 }
 
-interface Post {
-  id: number;
-  content: string;
-  createdAt: string;
-  user: User;
-  commentsCount: number;
-}
-
 const ProfilePage: React.FC = () => {
   const { user: currentUser, signOut } = useAuth();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
-  const [posts, setPosts] = useState<Post[]>([]);
   const [followersCount, setFollowersCount] = useState<number>(0);
 
   const fetchUserDetails = async (userId: number) => {
     try {
       const response = await api.get(`/users/${userId}`);
       setUser(response.data.user);
-      setPosts(response.data.user.posts);
       setFollowersCount(response.data.followersCount);
     } catch (error) {
       console.error('Error fetching user details:', error);
@@ -57,63 +49,49 @@ const ProfilePage: React.FC = () => {
     }
   };
 
-  const handleDeleteAccount = async () => {
-    if (window.confirm('Are you sure you want to delete your account?')) {
-      try {
-        await api.delete(`/users/${currentUser?.id}`);
-        signOut();
-        navigate('/login');
-      } catch (error) {
-        console.error('Error deleting account:', error);
-        alert('Error deleting account');
-      }
-    }
-  };
-
   if (!user) {
     return <div>Loading...</div>;
   }
 
+  const formattedBirthDate = new Date(user.birthDate).toLocaleDateString('pt-BR', {
+    day: '2-digit',
+    month: '2-digit'
+  });
+
   return (
-    <div>
-      <h1>Profile Page</h1>
-      <img
-        src={user.profilePicture ? `http://localhost:3333${user.profilePicture}` : 'default-avatar.png'}
-        alt="Profile"
-        className="h-40 w-40 border-2 border-white rounded-full object-cover"
-      />
-      <h2>{user.firstName} {user.lastName}</h2>
-      <p>Birth Date: {user.birthDate}</p>
-      <p>Followers: {followersCount}</p>
-      {currentUser?.id === user.id && (
-        <>
-          <button onClick={() => navigate('/')}>Home</button>
-          <button onClick={() => navigate('/profile/edit')}>Edit Profile</button>
-          <button onClick={handleLogout}>Logout</button>
-          <button onClick={handleDeleteAccount}>Delete Account</button>
-        </>
-      )}
-      <h2 className="mt-8 text-lg font-semibold">Posts</h2>
-      {posts.map((post) => (
-        <div key={post.id} className="mb-4 p-4 border border-gray-300 rounded shadow">
-          <div className="post-header flex gap-3 items-center">
-            <img
-              src={post.user.profilePicture ? `http://localhost:3333${post.user.profilePicture}` : 'default-avatar.png'}
-              alt={`${post.user.firstName} ${post.user.lastName}`}
-              className="h-16 w-16 rounded-full object-cover flex-shrink-0"
-            />
-            <div className='flex flex-col'>
-              <h5 className="text-xl font-medium">{post.user.firstName} {post.user.lastName}</h5>
-              <small className='font-medium'>{new Date(post.createdAt).toLocaleString()}</small>
-            </div>
-          </div>
-          <p>{post.content}</p>
-          <p className='bg-blue-500'>{post.commentsCount} comentários</p>
-          <div className='flex justify-center text-center m-auto min-w-[150px] btn-edit px-5 rounded-xl'>
-            <button onClick={() => navigate(`/posts/${post.id}`)}>Ver Post</button>
+    <div className='flex flex-col gap-2'>
+      <header className='p-10 shadow-m flex gap-3 items-center bg-lightGreen'>
+        <button
+          className="mb-auto size-10"
+          onClick={() => navigate(-1)}
+        >
+          <img src={arrowBack} alt="Voltar" />
+        </button>
+        <div className='flex items-center gap-8 ml-5'>
+          <img
+            src={user.profilePicture ? `http://localhost:3333${user.profilePicture}` : 'default-avatar.png'}
+            alt="Profile"
+            className="h-40 w-40 rounded-full object-cover"
+          />
+          <div id='infos' className='flex flex-col gap-3 '>
+            <h2 className='font-bold text-4xl'>{user.firstName} {user.lastName}</h2>
+            <small>Aniversário: {formattedBirthDate}</small>
+            <p className='font-medium'>{followersCount} Seguidores</p>
           </div>
         </div>
-      ))}
+        {currentUser?.id === user.id && (
+          <div className='ml-auto flex flex-col gap-5 items-center'>
+            <div className='space-x-5'>
+              <button className='btn-edit px-5' onClick={() => navigate('/profile/edit')}>Editar Perfil</button>
+              <button className='btn-danger px-5' onClick={handleLogout}>Sair</button>
+            </div>
+          </div>
+        )}
+      </header>
+      <div id='content' className='px-10 flex flex-col items-center gap-5'>
+        <h2 className="mt-8 text-lg font-semibold">Postagens</h2>
+        <PostList userId={user.id} />
+      </div>
     </div>
   );
 };
