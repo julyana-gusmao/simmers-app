@@ -1,3 +1,4 @@
+import ProfilePage from 'pages/ProfilePage';
 import React from 'react';
 import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -17,6 +18,7 @@ const App: React.FC = () => {
           <Route path="/" element={<PrivateRoute><Home /></PrivateRoute>} />
           <Route path="/users" element={<PrivateRoute><UsersPage /></PrivateRoute>} />
           <Route path="/posts/:id" element={<PrivateRoute><PostDetails /></PrivateRoute>} />
+          <Route path="/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
         </Routes>
       </Router>
     </AuthProvider>

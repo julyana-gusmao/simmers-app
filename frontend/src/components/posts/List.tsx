@@ -96,7 +96,7 @@ const PostList: React.FC<{ updatePosts: boolean }> = ({ updatePosts }) => {
               </div>
 
               {editingPostId === post.id ? (
-                <div>
+                <div className='space-y-3'>
                   <textarea
                     className='bg-[#ecffee] border-2 border-black/70 rounded-md py-5 px-3 w-full'
                     value={editedContent}

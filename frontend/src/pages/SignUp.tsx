@@ -1,7 +1,7 @@
+import logotype from '@utils/logotype.png';
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
-import logotype from '@utils/logotype.png'
 
 const SignUp: React.FC = () => {
   const [firstName, setFirstName] = useState('');
@@ -22,7 +22,7 @@ const SignUp: React.FC = () => {
         email,
         password,
       });
-      navigate('/login');
+      navigate('/');
     } catch (error) {
       console.error('Erro ao se cadastrar:', error);
     }

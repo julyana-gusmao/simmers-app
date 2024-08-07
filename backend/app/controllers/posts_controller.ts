@@ -72,6 +72,21 @@ export default class PostsController {
     return response.ok(post)
   }
 
+  public async getAllPosts({ auth, response }: HttpContext) {
+    if (!auth.isAuthenticated) {
+      return response.unauthorized({ message: 'User not authenticated' })
+    }
+
+    const posts = await Post.query()
+        .preload('user', (userQuery) => {
+          userQuery.select('id', 'firstName', 'lastName', 'profilePicture')
+        })
+        .withCount('comments')
+        .orderBy('createdAt', 'desc')
+
+      return response.ok(posts)
+  }
+
   public async update({ params, request, response, auth }: HttpContext) {
     try {
       const user = auth.user!
