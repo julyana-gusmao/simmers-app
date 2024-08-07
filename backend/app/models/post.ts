@@ -1,7 +1,8 @@
-import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm'
+import { BaseModel, belongsTo, column, computed, hasMany } from '@adonisjs/lucid/orm'
+import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import { DateTime } from 'luxon'
+import Comment from './comment.js'
 import User from './user.js'
-import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 
 export default class Post extends BaseModel {
   @column({ isPrimary: true })
@@ -21,4 +22,12 @@ export default class Post extends BaseModel {
 
   @belongsTo(() => User)
   public user: BelongsTo<typeof User>
+
+  @hasMany(() => Comment)
+  public comments: HasMany<typeof Comment>
+
+  @computed()
+  public get commentsCount(): number {
+    return this.$extras.comments_count || 0
+  }
 }
