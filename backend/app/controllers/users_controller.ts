@@ -1,8 +1,9 @@
-import type { HttpContext } from '@adonisjs/core/http'
-import User from '../models/user.js'
-import { ModelQueryBuilderContract } from '@adonisjs/lucid/types/model';
 import Follower from '#models/follower';
-import Hash from '@adonisjs/core/services/hash'
+import Post from '#models/post';
+import type { HttpContext } from '@adonisjs/core/http';
+import Hash from '@adonisjs/core/services/hash';
+import { ModelQueryBuilderContract } from '@adonisjs/lucid/types/model';
+import User from '../models/user.js';
 
 export default class UsersController {
 
@@ -19,14 +20,25 @@ export default class UsersController {
 
   public async show({ params, response }: HttpContext) {
     try {
-      const user = await User.findOrFail(params.id)
-      await user.load('posts')
-      await user.load('following', (query: ModelQueryBuilderContract<typeof Follower, Follower>) => {
-        query.preload('user', (userQuery: ModelQueryBuilderContract<typeof User, User>) => {
-          userQuery.select('id', 'firstName', 'lastName', 'email', 'profilePicture');
-        });
-      });
-      return response.ok(user)
+      const user = await User.query()
+        .where('id', params.id)
+        .preload('posts', (postQuery: ModelQueryBuilderContract<typeof Post>) => {
+          postQuery.preload('user')
+          postQuery.withCount('comments')
+        })
+        .preload('followers')
+        .firstOrFail()
+
+      await user.load('following', (query: ModelQueryBuilderContract<typeof Follower>) => {
+        query.preload('user', (userQuery: ModelQueryBuilderContract<typeof User>) => {
+          userQuery.select('id', 'firstName', 'lastName', 'email', 'profilePicture')
+        })
+      })
+
+      return response.ok({
+        user,
+        followersCount: user.followers.length,
+      })
     } catch {
       return response.notFound({ message: 'User not found' })
     }

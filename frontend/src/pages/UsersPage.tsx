@@ -4,7 +4,6 @@ import FollowButton from '../components/followers/FollowButton';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
 
-
 interface User {
   id: number;
   firstName: string;
@@ -100,7 +99,9 @@ const UsersPage: React.FC = () => {
         />
         {filteredUsers.map((userItem) => (
           <div key={userItem.id} className="mb-4 p-4 border border-gray-300 rounded shadow">
-            <h2 className="text-lg font-semibold">{userItem.firstName} {userItem.lastName}</h2>
+            <h2 className="text-lg font-semibold">
+              <Link to={`/users/${userItem.id}`}>{userItem.firstName} {userItem.lastName}</Link>
+            </h2>
             {userItem.id !== user?.id && (
               <FollowButton
                 userId={userItem.id}
