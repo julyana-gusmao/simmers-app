@@ -21,7 +21,7 @@ const Login: React.FC = () => {
 
   return (
 
-    <section className='bg-darkGreen flex justify-between h-screen'>
+    <section className='flex justify-between h-screen'>
 
       <div id='hero'
         className='flex flex-col h-full w-3/4 gap-6 bg-custom-bg bg-cover bg-center justify-center items-center'>
@@ -32,8 +32,8 @@ const Login: React.FC = () => {
 
 
       <div id='LOGIN'
-        className='w-1/4 flex flex-col justify-evenly items-center'>
-        <form onSubmit={handleLogin} className='flex flex-col gap-4 w-72 [&>input]:p-2 [&>input]:rounded-md'>
+        className='bg-darkGreen w-1/4 flex flex-col justify-evenly items-center'>
+        <form onSubmit={handleLogin} className='flex flex-col gap-4 w-72'>
           <input
             type="email"
             placeholder="Email"
@@ -53,7 +53,7 @@ const Login: React.FC = () => {
         <div className='flex flex-col gap-3 items-center'>
           <p className='text-white'>Não tem uma conta?</p>
             <Link to="/signup">
-              <button className="btn-secondary font-medium">
+              <button className="btn-secondary font-medium text-white px-5 shadow-m hover:scale-110">
                 Cadastre-se grátis!
               </button>
             </Link>
