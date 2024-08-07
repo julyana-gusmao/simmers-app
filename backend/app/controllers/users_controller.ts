@@ -74,9 +74,9 @@ export default class UsersController {
       return response.badRequest({ message: 'Profile picture is required' });
     }
 
-    await profilePic.move('./uploads');
+    await profilePic.move('public/uploads');
 
-    user.profilePicture = profilePic.fileName || null;
+    user.profilePicture = `/uploads/${profilePic.fileName}` || null
     await user.save();
 
     return response.ok({ message: 'Profile picture updated successfully', data: user });

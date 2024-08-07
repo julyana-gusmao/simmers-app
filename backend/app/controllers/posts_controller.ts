@@ -14,22 +14,24 @@ export default class PostsController {
     const followingIds = following.map(follow => follow.userId);
 
     let followingPosts: Post[] = [];
-    
+
     if (followingIds.length > 0) {
-        followingPosts = await Post.query()
-          .whereIn('userId', followingIds)
-          .preload('user')
-          .orderBy('createdAt', 'desc');
+      followingPosts = await Post.query()
+        .whereIn('userId', followingIds)
+        .preload('user', (userQuery) => {
+          userQuery.select('id', 'firstName', 'lastName', 'profilePicture');
+        })
+        .orderBy('createdAt', 'desc');
     }
 
     const posts = [...userPosts, ...followingPosts].sort((a, b) => {
-        return new Date(b.createdAt.toString()).getTime() - new Date(a.createdAt.toString()).getTime();
+      return new Date(b.createdAt.toString()).getTime() - new Date(a.createdAt.toString()).getTime();
     });
 
     return response.ok(posts);
-}
+  }
 
-  
+
   public async store({ auth, request, response }: HttpContext) {
     const user = auth.user!
 
@@ -60,11 +62,11 @@ export default class PostsController {
     try {
       const user = auth.user!
       const post = await Post.findOrFail(params.id)
-      
+
       if (post.userId !== user.id) {
         return response.unauthorized({ message: 'You are not allowed to update this post' })
       }
-      
+
       post.merge(request.only(['content']))
       await post.save()
       return response.ok({ message: 'Post updated successfully', data: post })
@@ -77,11 +79,11 @@ export default class PostsController {
     try {
       const user = auth.user!
       const post = await Post.findOrFail(params.id)
-      
+
       if (post.userId !== user.id) {
         return response.unauthorized({ message: 'You are not allowed to delete this post' })
       }
-      
+
       await post.delete()
       return response.ok({ message: 'Post deleted successfully' })
     } catch {
