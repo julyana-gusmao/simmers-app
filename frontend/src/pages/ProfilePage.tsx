@@ -34,7 +34,11 @@ const ProfilePage: React.FC = () => {
   return (
     <div>
       <h1>Profile Page</h1>
-      <img src={user?.profilePicture || 'default-avatar.png'} alt="Profile" width="100" height="100" />
+      <img
+        src={user?.profilePicture ? `http://localhost:3333${user.profilePicture}` : 'default-avatar.png'}
+        alt="Profile"
+        className="h-40 w-40 border-2 border-white rounded-full object-cover"
+      />
       <h2>{user?.firstName} {user?.lastName}</h2>
       <p>Birth Date: {user?.birthDate}</p>
       <button onClick={() => navigate('/')}>Home</button>

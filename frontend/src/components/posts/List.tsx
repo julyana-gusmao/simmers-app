@@ -1,4 +1,3 @@
-// PostList.tsx
 import React, { useEffect, useState } from 'react';
 import api from '../../services/api';
 import CommentsList from '../comments/List';
@@ -22,6 +21,8 @@ const PostList: React.FC<{ updatePosts: boolean }> = ({ updatePosts }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const { user } = useAuth();
   const [updateComments, setUpdateComments] = useState<boolean>(false);
+  const [editingPostId, setEditingPostId] = useState<number | null>(null);
+  const [editedContent, setEditedContent] = useState<string>('');
 
   const fetchPosts = async () => {
     try {
@@ -43,6 +44,16 @@ const PostList: React.FC<{ updatePosts: boolean }> = ({ updatePosts }) => {
     }
   };
 
+  const handleEditPost = async (postId: number) => {
+    try {
+      await api.put(`/posts/${postId}`, { content: editedContent });
+      fetchPosts();
+      setEditingPostId(null);
+    } catch (error) {
+      console.error('Erro ao editar post:', error);
+    }
+  };
+
   const handleCommentAdded = () => {
     setUpdateComments(!updateComments);
   };
@@ -56,27 +67,54 @@ const PostList: React.FC<{ updatePosts: boolean }> = ({ updatePosts }) => {
   }
 
   return (
-    <div>
+    <div className='w-[60vw]'>
       {posts.length > 0 ? (
         posts.map((post) => (
-          <div key={post.id} className="post">
-            <div className="post-header">
-              <img
-                src={post.user.profilePicture || 'default-avatar.png'}
-                alt={`${post.user.firstName} ${post.user.lastName}`}
-                className="profile-picture"
-                width="50"
-                height="50"
-              />
-              <h2>{post.user.firstName} {post.user.lastName}</h2>
+          <div key={post.id} className="flex flex-col gap-2 bg-white p-3 border border-black">
+            <div className='border border-black/30 p-5 flex flex-col gap-5 rounded-md mb-6'>
+              <div className="post-header flex gap-3 items-center">
+                <img
+                  src={post.user.profilePicture ? `http://localhost:3333${post.user.profilePicture}` : 'default-avatar.png'}
+                  alt={`${post.user.firstName} ${post.user.lastName}`}
+                  className="h-16 w-16 rounded-full object-cover flex-shrink-0"
+                />
+                <h5 className="text-xl font-medium">{post.user.firstName} {post.user.lastName}</h5>
+              </div>
+
+
+              {editingPostId === post.id ? (
+                <div>
+                  <textarea
+                    value={editedContent}
+                    onChange={(e) => setEditedContent(e.target.value)}
+                  />
+                  <button onClick={() => handleEditPost(post.id)}>Salvar</button>
+                  <button onClick={() => setEditingPostId(null)}>Cancelar</button>
+                </div>
+              ) : (
+                <div className='bg-[#ecffee] rounded-md py-5 px-3'>
+                  <p>{post.content}</p>
+                </div>
+              )}
+
+
+              <div className='flex justify-between items-center'>
+                <small className='font-medium'>{new Date(post.createdAt).toLocaleString()}</small>
+                {user?.id === post.user.id && (
+                  <div className='space-x-3'>
+                    <button className="btn-edit px-3" onClick={() => {
+                      setEditingPostId(post.id);
+                      setEditedContent(post.content);
+                    }}><small>Editar</small></button>
+                    <button className='btn-danger px-3' onClick={() => handleDeletePost(post.id)}><small>Deletar</small></button>
+                  </div>
+                )}
+              </div>
             </div>
-            <p>{post.content}</p>
-            <small>{new Date(post.createdAt).toLocaleString()}</small>
-            {user?.id === post.user.id && (
-              <button onClick={() => handleDeletePost(post.id)}>Deletar</button>
-            )}
+            <div className='flex justify-center text-center m-auto min-w-[150px] btn-edit px-5 rounded-xl'>
+              <CommentForm postId={post.id} onCommentAdded={handleCommentAdded} />
+            </div>
             <CommentsList postId={post.id} updateComments={updateComments} postAuthorId={post.user.id} />
-            <CommentForm postId={post.id} onCommentAdded={handleCommentAdded} />
           </div>
         ))
       ) : (
