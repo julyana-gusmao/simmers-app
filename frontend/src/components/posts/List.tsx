@@ -13,6 +13,7 @@ interface Post {
     id: number;
     firstName: string;
     lastName: string;
+    profilePicture: string | null;
   };
 }
 
@@ -43,7 +44,7 @@ const PostList: React.FC<{ updatePosts: boolean }> = ({ updatePosts }) => {
   };
 
   const handleCommentAdded = () => {
-    setUpdateComments(!updateComments); // Alternar o estado para atualizar a lista de comentários
+    setUpdateComments(!updateComments);
   };
 
   useEffect(() => {
@@ -58,8 +59,17 @@ const PostList: React.FC<{ updatePosts: boolean }> = ({ updatePosts }) => {
     <div>
       {posts.length > 0 ? (
         posts.map((post) => (
-          <div key={post.id}>
-            <h2>{post.user.firstName} {post.user.lastName}</h2>
+          <div key={post.id} className="post">
+            <div className="post-header">
+              <img
+                src={post.user.profilePicture || 'default-avatar.png'}
+                alt={`${post.user.firstName} ${post.user.lastName}`}
+                className="profile-picture"
+                width="50"
+                height="50"
+              />
+              <h2>{post.user.firstName} {post.user.lastName}</h2>
+            </div>
             <p>{post.content}</p>
             <small>{new Date(post.createdAt).toLocaleString()}</small>
             {user?.id === post.user.id && (
