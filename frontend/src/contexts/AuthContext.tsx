@@ -45,9 +45,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       localStorage.setItem('user', JSON.stringify(userData));
       localStorage.setItem('token', token);
-    } catch (error) {
-      console.error('Erro ao fazer login:', error);
-      throw error;
+    } catch (error: any) {
+      if (error.response && error.response.status === 400) {
+        throw new Error('Invalid credentials');
+      } else {
+        console.error('Erro ao fazer login:', error);
+        throw new Error('Erro ao fazer login, tente novamente.');
+      }
     }
   }
 

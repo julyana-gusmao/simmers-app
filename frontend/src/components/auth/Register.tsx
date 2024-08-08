@@ -1,67 +1,45 @@
+import React, { useState, useRef } from 'react';
 import logotype from '@utils/logotype.png';
 import calendar from '@utils/calendar.svg';
-import React, { useState, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import InputMask from 'react-input-mask';
-import api from './../../services/api';
+import { Link } from 'react-router-dom';
 
-const Register: React.FC = () => {
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [birthDate, setBirthDate] = useState<Date | null>(null);
-  const [phone, setPhone] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
-  const navigate = useNavigate();
+interface RegisterProps {
+  firstName: string;
+  setFirstName: React.Dispatch<React.SetStateAction<string>>;
+  lastName: string;
+  setLastName: React.Dispatch<React.SetStateAction<string>>;
+  birthDate: Date | null;
+  setBirthDate: React.Dispatch<React.SetStateAction<Date | null>>;
+  phone: string;
+  setPhone: React.Dispatch<React.SetStateAction<string>>;
+  email: string;
+  setEmail: React.Dispatch<React.SetStateAction<string>>;
+  password: string;
+  setPassword: React.Dispatch<React.SetStateAction<string>>;
+  errorMessage: string;
+  handleSignUp: () => void;
+}
+
+const Register: React.FC<RegisterProps> = ({
+  firstName,
+  setFirstName,
+  lastName,
+  setLastName,
+  birthDate,
+  setBirthDate,
+  phone,
+  setPhone,
+  email,
+  setEmail,
+  password,
+  setPassword,
+  errorMessage,
+  handleSignUp
+}) => {
   const datePickerRef = useRef<DatePicker>(null);
-
-  const handleSignUp = async () => {
-    if (!firstName || !lastName || !birthDate || !phone || !email || !password) {
-      setErrorMessage('Por favor, preencha todos os campos');
-      return;
-    }
-
-    if (firstName.length < 3 || firstName.length > 30) {
-      setErrorMessage('O nome deve ter entre 3 e 30 caracteres');
-      return;
-    }
-
-    if (lastName.length < 3 || lastName.length > 30) {
-      setErrorMessage('O sobrenome deve ter entre 3 e 30 caracteres');
-      return;
-    }
-
-    if (email.length < 3 || email.length > 50) {
-      setErrorMessage('O email deve ter entre 3 e 50 caracteres');
-      return;
-    }
-
-    if (password.length < 6 || password.length > 20) {
-      setErrorMessage('A senha deve ter entre 6 e 20 caracteres');
-      return;
-    }
-
-    try {
-      await api.post('/auth/register', {
-        first_name: firstName,
-        last_name: lastName,
-        birth_date: birthDate ? birthDate.toISOString().split('T')[0] : null,
-        phone,
-        email,
-        password,
-      });
-      navigate('/');
-    } catch (error: any) {
-      if (error.response && error.response.data && error.response.data.message) {
-        setErrorMessage('Esse email já possui conta registrada no Simmers');
-      } else {
-        setErrorMessage('Erro ao se cadastrar, tente novamente.');
-      }
-    }
-  };
 
   return (
     <section className='flex justify-between h-screen'>

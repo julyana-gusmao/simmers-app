@@ -3,11 +3,11 @@ import React from 'react';
 import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Home from './pages/Home';
-import Login from './pages/Auth/Login';
+import Login from './pages/Auth/LoginPage';
 import PostDetails from './pages/PostDetails';
 import ExplorerPage from './pages/ExplorerPage';
-import UpdateProfilePage from 'pages/Auth/UpdateProfile';
-import Register from 'pages/Auth/Register';
+import UpdateProfilePage from 'pages/Auth/UpdateProfilePage';
+import Register from 'pages/Auth/RegisterPage';
 
 const App: React.FC = () => {
   return (
