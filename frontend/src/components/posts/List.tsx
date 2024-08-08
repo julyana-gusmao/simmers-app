@@ -1,9 +1,13 @@
+import WarningModal from '@components/modal/WarningModal';
 import comment from '@utils/comment.svg';
+import defaultAvatar from '@utils/default-avatar.png';
+import editButton from '@utils/edit.svg';
+import deleteButton from '@utils/delete.svg'
+import plumbob from '@utils/plumbob.png';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import api from '../../services/api';
-import plumbob from '@utils/plumbob.png';
 
 interface Post {
   id: number;
@@ -29,15 +33,23 @@ const PostList: React.FC<{ userId?: number; updatePosts?: boolean }> = ({ userId
   const navigate = useNavigate();
   const [editingPostId, setEditingPostId] = useState<number | null>(null);
   const [editedContent, setEditedContent] = useState<string>('');
+  const [showWarningModal, setShowWarningModal] = useState<boolean>(false);
+  const [postIdToDelete, setPostIdToDelete] = useState<number | null>(null);
 
   const fetchPosts = async (page: number, append: boolean = false) => {
     try {
-      const url = userId
-        ? `/users/${userId}/posts?page=${page}&limit=5`
-        : `/posts/all?page=${page}&limit=5`;
+      let url = '';
+
+      if (userId) {
+        url = `/users/${userId}/posts?page=${page}&limit=5`;
+      } else if (window.location.pathname === '/') {
+        url = `/posts?page=${page}&limit=5`;
+      } else {
+        url = `/posts/all?page=${page}&limit=5`; 
+      }
 
       const response = await api.get(url);
-      const fetchedPosts = response.data;
+      const fetchedPosts = Array.isArray(response.data.data) ? response.data.data : response.data;
 
       setPosts((prevPosts) => append ? [...prevPosts, ...fetchedPosts] : fetchedPosts);
       if (fetchedPosts.length < 5) {
@@ -54,11 +66,19 @@ const PostList: React.FC<{ userId?: number; updatePosts?: boolean }> = ({ userId
   };
 
   const handleDeletePost = async (postId: number) => {
+    setPostIdToDelete(postId);
+    setShowWarningModal(true);
+  };
+
+  const confirmDeletePost = async () => {
+    if (!postIdToDelete) return;
     try {
-      await api.delete(`/posts/${postId}`);
-      setPosts(posts.filter(post => post.id !== postId));
+      await api.delete(`/posts/${postIdToDelete}`);
+      setPosts(posts.filter(post => post.id !== postIdToDelete));
     } catch (error) {
       console.error('Erro ao deletar post:', error);
+    } finally {
+      setShowWarningModal(false);
     }
   };
 
@@ -100,11 +120,10 @@ const PostList: React.FC<{ userId?: number; updatePosts?: boolean }> = ({ userId
             <div className='p-2 flex flex-col gap-5 rounded-md mb-6'>
               <div className="post-header flex gap-3 items-center">
                 <img
-                  src={post.user.profilePicture ? `http://localhost:3333${post.user.profilePicture}` : 'default-avatar.png'}
+                  src={post.user.profilePicture ? `http://localhost:3333${post.user.profilePicture}` : defaultAvatar}
                   alt={`${post.user.firstName} ${post.user.lastName}`}
                   className="h-16 w-16 rounded-full object-cover flex-shrink-0"
                 />
-
                 <div className='flex flex-col'>
                   <div className='flex gap-2'>
                     <h5 className="text-lg font-medium">{post.user.firstName} {post.user.lastName}</h5>
@@ -113,18 +132,20 @@ const PostList: React.FC<{ userId?: number; updatePosts?: boolean }> = ({ userId
                   <small className='font-medium'>{new Date(post.createdAt).toLocaleString()}</small>
                   {new Date(post.updatedAt).getTime() > new Date(post.createdAt).getTime() && <small className='text-gray-400'>Post editado</small>}
                 </div>
-
                 {user?.id === post.user.id && (
-                  <div className='ml-auto space-x-3'>
-                    <button className="btn-edit px-3" onClick={() => {
+                  <div className='ml-auto mr-4 space-x-1'>
+                    <button onClick={() => {
                       setEditingPostId(post.id);
                       setEditedContent(post.content);
-                    }}><small>Editar</small></button>
-                    <button className='btn-danger px-3' onClick={() => handleDeletePost(post.id)}><small>Deletar</small></button>
+                    }}>
+                    <img src={editButton} alt="Editar" width={40} />
+                    </button>
+                    <button onClick={() => handleDeletePost(post.id)}>
+                    <img src={deleteButton} alt="Apagar" width={40} />
+                      </button>
                   </div>
                 )}
               </div>
-
               {editingPostId === post.id ? (
                 <div className='space-y-3'>
                   <textarea
@@ -138,11 +159,10 @@ const PostList: React.FC<{ userId?: number; updatePosts?: boolean }> = ({ userId
                   </div>
                 </div>
               ) : (
-                <div className='bg-[#ecffee] rounded-md py-5 px-3'>
+                <div className='bg-[#ecffee] rounded-md py-5 px-3 mr-5'>
                   <p>{post.content}</p>
                 </div>
               )}
-
               <div className='flex text-center justify-end gap-5 w-full px-5 rounded-xl'>
                 <button id='comments' onClick={() => navigate(`/posts/${post.id}`)}>
                   <div className='flex gap-1 items-center'>
@@ -156,7 +176,7 @@ const PostList: React.FC<{ userId?: number; updatePosts?: boolean }> = ({ userId
           </div>
         ))
       ) : (
-        <p>Não há posts para exibir.</p>
+        <p className='text-center text-lg'>Nenhum post, está tão quieto por aqui...</p>
       )}
       {hasMore && (
         <div className="text-center">
@@ -164,6 +184,13 @@ const PostList: React.FC<{ userId?: number; updatePosts?: boolean }> = ({ userId
             {loadingMore ? 'Carregando...' : 'Carregar Mais'}
           </button>
         </div>
+      )}
+      {showWarningModal && (
+        <WarningModal
+          message="Apagar post?"
+          onConfirm={confirmDeletePost}
+          onCancel={() => setShowWarningModal(false)}
+        />
       )}
     </div>
   );

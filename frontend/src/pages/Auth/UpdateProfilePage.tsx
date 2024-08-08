@@ -1,11 +1,12 @@
-import React, { useEffect, useState, useRef } from 'react';
+import UpdateProfile from '@components/auth/UpdateProfile';
+import SuccessModal from '@components/modal/SuccessModal';
+import WarningModal from '@components/modal/WarningModal';
+import defaultAvatar from '@utils/default-avatar.png';
+import React, { useEffect, useRef, useState } from 'react';
+import DatePicker from 'react-datepicker';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import api from '../../services/api';
-import arrowBack from '@utils/arrow-back.svg';
-import DatePicker from 'react-datepicker';
-import UpdateProfile from '@components/users/UpdateProfile';
-import SuccessModal from '@components/modal/SuccessModal';
 
 const UpdateProfilePage: React.FC = () => {
   const { user: currentUser, updateUser, signOut } = useAuth();
@@ -23,6 +24,7 @@ const UpdateProfilePage: React.FC = () => {
   const [showPasswordInput, setShowPasswordInput] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
+  const [showWarningModal, setShowWarningModal] = useState<boolean>(false);
   const datePickerRef = useRef<DatePicker>(null);
 
   useEffect(() => {
@@ -32,7 +34,7 @@ const UpdateProfilePage: React.FC = () => {
       setBirthDate(currentUser.birthDate ? new Date(currentUser.birthDate) : null);
       setPhone(currentUser.phone || '');
       setEmail(currentUser.email || '');
-      setProfilePictureUrl(currentUser.profilePicture ? `http://localhost:3333${currentUser.profilePicture}` : 'default-avatar.png');
+      setProfilePictureUrl(currentUser.profilePicture ? `http://localhost:3333${currentUser.profilePicture}` : defaultAvatar);
     }
   }, [currentUser]);
 
@@ -103,15 +105,19 @@ const UpdateProfilePage: React.FC = () => {
   };
 
   const handleDeleteAccount = async () => {
-    if (window.confirm('Are you sure you want to delete your account?')) {
-      try {
-        await api.delete(`/users/${currentUser?.id}`);
-        signOut();
-        navigate('/login');
-      } catch (error) {
-        console.error('Error deleting account:', error);
-        alert('Error deleting account');
-      }
+    setShowWarningModal(true);
+  };
+
+  const confirmDeleteAccount = async () => {
+    try {
+      await api.delete(`/users/${currentUser?.id}`);
+      signOut();
+      navigate('/login');
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      alert('Error deleting account');
+    } finally {
+      setShowWarningModal(false);
     }
   };
 
@@ -127,14 +133,7 @@ const UpdateProfilePage: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col items-center gap-4">
-      <button
-        className="size-10 absolute bottom-44 left-10"
-        onClick={() => navigate(-1)}
-      >
-        <img src={arrowBack} alt="Voltar" />
-      </button>
-      <h1 className="text-2xl font-bold">Edit Profile</h1>
+    <div className="flex flex-col items-center gap-4 bg-default-bg bg-cover bg-no-repeat bg-center min-h-screen justify-evenly">
       <UpdateProfile
         firstName={firstName}
         lastName={lastName}
@@ -158,20 +157,28 @@ const UpdateProfilePage: React.FC = () => {
         setShowEmailInput={setShowEmailInput}
         setShowPasswordInput={setShowPasswordInput}
         handleSubmit={handleSubmit}
-        handleDeleteAccount={handleDeleteAccount}
         datePickerRef={datePickerRef}
       />
       <button
-        onClick={() => navigate('/profile')}
-        className="bg-gray-500 text-white px-4 py-2 rounded-md mt-4"
+        type="button"
+        onClick={handleDeleteAccount}
+        className="bg-red-500 text-white px-4 py-2 mt-10 rounded-md"
       >
-        Back to Profile
+        Excluir minha conta
       </button>
+
       {showSuccessModal && (
         <SuccessModal
           onClose={() => setShowSuccessModal(false)}
           message="Informações atualizadas com sucesso!"
           redirectPath="/profile"
+        />
+      )}
+      {showWarningModal && (
+        <WarningModal
+          message="Tem certeza que deseja deletar sua conta? Essa ação é permanente"
+          onConfirm={confirmDeleteAccount}
+          onCancel={() => setShowWarningModal(false)}
         />
       )}
     </div>

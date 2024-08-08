@@ -1,7 +1,8 @@
+import defaultAvatar from '@utils/default-avatar.png';
+import plumbob from '@utils/plumbob.png';
+import { useAuth } from 'contexts/AuthContext';
 import React, { useEffect, useState } from 'react';
 import api from '../../services/api';
-import { useAuth } from '../../contexts/AuthContext';
-import plumbob from '@utils/plumbob.png'
 
 interface User {
   id: number;
@@ -88,7 +89,7 @@ const CommentsList: React.FC<CommentsListProps> = ({ postId, updateComments, pos
         <div key={comment.id} id="comment-container" className="bg-gray-100 p-4 gap-3 rounded-md flex flex-col">
           <div id="comment-header" className="flex gap-3 items-center">
             <img
-              src={comment.user.profilePicture ? `http://localhost:3333${comment.user.profilePicture}` : 'default-avatar.png'}
+              src={comment.user.profilePicture ? `http://localhost:3333${comment.user.profilePicture}` : defaultAvatar}
               alt={`${comment.user.firstName} ${comment.user.lastName}`}
               className="h-9 w-9 rounded-full object-cover flex-shrink-0"
             />

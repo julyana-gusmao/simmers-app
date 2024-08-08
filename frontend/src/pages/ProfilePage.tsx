@@ -1,9 +1,12 @@
+import PostList from '@components/posts/List';
+import arrowBack from '@utils/arrow-back.svg';
+import defaultAvatar from '@utils/default-avatar.png';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
-import PostList from '@components/posts/List';
-import arrowBack from '@utils/arrow-back.svg';
 
 interface User {
   id: number;
@@ -53,13 +56,10 @@ const ProfilePage: React.FC = () => {
     return <div>Loading...</div>;
   }
 
-  const formattedBirthDate = new Date(user.birthDate).toLocaleDateString('pt-BR', {
-    day: '2-digit',
-    month: '2-digit'
-  });
+  const formattedBirthDate = format(new Date(user.birthDate), "dd 'de' MMMM", { locale: ptBR });
 
   return (
-    <div className='flex flex-col gap-2 bg-default-bg bg-cover bg-no-repeat bg-center'>
+    <div className='flex flex-col min-h-screen gap-2 bg-default-bg bg-cover bg-no-repeat bg-center'>
       <header className='py-10 px-20 relative shadow-m flex gap-3 items-center bg-mediumGreen'>
         <button
           className="size-10 absolute bottom-44 left-10"
@@ -69,7 +69,7 @@ const ProfilePage: React.FC = () => {
         </button>
         <div className='flex items-center gap-8 ml-5'>
           <img
-            src={user.profilePicture ? `http://localhost:3333${user.profilePicture}` : 'default-avatar.png'}
+            src={user.profilePicture ? `http://localhost:3333${user.profilePicture}` : defaultAvatar}
             alt="Profile"
             className="h-40 w-40 rounded-full object-cover"
           />

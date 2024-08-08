@@ -1,10 +1,10 @@
+import searchIcon from '@utils/search.svg';
+import { useAuth } from 'contexts/AuthContext';
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import FollowButton from '../components/followers/FollowButton';
-import { useAuth } from '../contexts/AuthContext';
 import PostList from '../components/posts/List';
 import api from '../services/api';
-import searchIcon from '@utils/search.svg';
 
 interface User {
   id: number;
@@ -12,7 +12,7 @@ interface User {
   lastName: string;
 }
 
-const UsersPage: React.FC = () => {
+const ExplorerPage: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [following, setFollowing] = useState<number[]>([]);
   const [loadingFollowing, setLoadingFollowing] = useState<boolean>(true);
@@ -122,4 +122,4 @@ const UsersPage: React.FC = () => {
   );
 };
 
-export default UsersPage;
+export default ExplorerPage;

@@ -1,6 +1,6 @@
+import successIcon from '@utils/success.svg';
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import successIcon from '@utils/success.svg';
 
 interface SuccessModalProps {
   onClose: () => void;
@@ -15,12 +15,12 @@ const SuccessModal: React.FC<SuccessModalProps> = ({ onClose, message, redirectP
     const timer1 = setTimeout(() => {
       document.getElementById('loading-text')!.innerText = message;
       document.getElementById('success-icon')!.style.display = 'block';
-    }, 2000);
+    }, 900);
 
     const timer2 = setTimeout(() => {
       onClose();
       navigate(redirectPath);
-    }, 3000);
+    }, 2000);
 
     return () => {
       clearTimeout(timer1);

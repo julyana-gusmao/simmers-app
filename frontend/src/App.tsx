@@ -1,13 +1,13 @@
+import Register from 'pages/Auth/RegisterPage';
+import UpdateProfilePage from 'pages/Auth/UpdateProfilePage';
 import ProfilePage from 'pages/ProfilePage';
 import React from 'react';
 import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import Home from './pages/Home';
 import Login from './pages/Auth/LoginPage';
-import PostDetails from './pages/PostDetails';
 import ExplorerPage from './pages/ExplorerPage';
-import UpdateProfilePage from 'pages/Auth/UpdateProfilePage';
-import Register from 'pages/Auth/RegisterPage';
+import Home from './pages/Home';
+import PostDetails from './pages/PostDetails';
 
 const App: React.FC = () => {
   return (
