@@ -28,7 +28,7 @@ const FollowButton: React.FC<FollowButtonProps> = ({ userId, isFollowing, onFoll
 
   return (
     <button onClick={handleFollow} disabled={loading}>
-      {isFollowing ? 'Deixar de Seguir' : 'Seguir'}
+      <p className='text-sm'>{isFollowing ? 'Deixar de Seguir' : 'Seguir'}</p>
     </button>
   );
 };

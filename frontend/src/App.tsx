@@ -6,7 +6,7 @@ import Home from './pages/Home';
 import Login from './pages/Auth/Login';
 import PostDetails from './pages/PostDetails';
 import ExplorerPage from './pages/ExplorerPage';
-import EditProfilePage from 'pages/Auth/EditProfilePage';
+import UpdateProfilePage from 'pages/Auth/UpdateProfile';
 import Register from 'pages/Auth/Register';
 
 const App: React.FC = () => {
@@ -21,7 +21,7 @@ const App: React.FC = () => {
           <Route path="/users/:id" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
           <Route path="/posts/:id" element={<PrivateRoute><PostDetails /></PrivateRoute>} />
           <Route path="/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
-          <Route path="/profile/edit" element={<PrivateRoute><EditProfilePage /></PrivateRoute>} />
+          <Route path="/profile/edit" element={<PrivateRoute><UpdateProfilePage /></PrivateRoute>} />
         </Routes>
       </Router>
     </AuthProvider>

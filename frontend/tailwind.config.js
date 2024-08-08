@@ -24,6 +24,8 @@ module.exports = {
       backgroundImage: {
         "custom-bg": "url('/src/utils/background.png')",
         "register-bg": "url('/src/utils/register-background.png')",
+        "default-bg": "url('/src/utils/default-background.png')",
+        "cas-bg": "url('/src/utils/cas-bg.png')"
       },
       keyframes: {
         "accordion-down": {

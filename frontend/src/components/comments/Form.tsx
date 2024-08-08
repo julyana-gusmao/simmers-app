@@ -43,7 +43,7 @@ const CommentForm: React.FC<CommentFormProps> = ({ postId, onCommentAdded }) => 
           </div>
         </form>
       ) : (
-        <button onClick={() => setIsCommenting(true)}>Adicionar comentário</button>
+        <button className='btn-secondary hover:scale-100 px-5 text-xs text-white' onClick={() => setIsCommenting(true)}>Adicionar comentário</button>
       )}
     </div>
   );

@@ -59,11 +59,11 @@ const ProfilePage: React.FC = () => {
   });
 
   return (
-    <div className='flex flex-col gap-2'>
-      <header className='p-10 shadow-m flex gap-3 items-center bg-lightGreen'>
+    <div className='flex flex-col gap-2 bg-default-bg bg-cover bg-no-repeat bg-center'>
+      <header className='py-10 px-20 relative shadow-m flex gap-3 items-center bg-mediumGreen'>
         <button
-          className="mb-auto size-10"
-          onClick={() => navigate(-1)}
+          className="size-10 absolute bottom-44 left-10"
+          onClick={() => navigate('/')}
         >
           <img src={arrowBack} alt="Voltar" />
         </button>

@@ -23,7 +23,7 @@ export default class UsersController {
     const page = request.input('page', 1);
     const limit = request.input('limit', 5);
     const offset = (page - 1) * limit;
-  
+
     const posts = await Post.query()
       .where('user_id', userId)
       .preload('user')
@@ -31,7 +31,7 @@ export default class UsersController {
       .orderBy('createdAt', 'desc')
       .offset(offset)
       .limit(limit);
-  
+
     return response.ok(posts);
   }
 
@@ -63,12 +63,13 @@ export default class UsersController {
 
   public async update({ params, request, response }: HttpContext) {
     try {
-      const user = await User.findOrFail(params.id)
-      user.merge(request.only(['firstName', 'lastName', 'birthDate', 'phone', 'email']))
-      await user.save()
-      return response.ok({ message: 'User updated successfully', data: user })
-    } catch {
-      return response.notFound({ message: 'User not found' })
+      const user = await User.findOrFail(params.id);
+      user.merge(request.only(['firstName', 'lastName', 'birthDate', 'phone', 'email']));
+      await user.save();
+      return response.ok({ message: 'User updated successfully', data: user });
+    } catch (error) {
+      console.error('Error updating user:', error);
+      return response.notFound({ message: 'User not found' });
     }
   }
 
@@ -94,21 +95,26 @@ export default class UsersController {
     return response.ok({ message: 'Password updated successfully', token });
   }
 
-
   public async updateProfilePicture({ auth, request, response }: HttpContext) {
-    const user = auth.user!;
-    const profilePic = request.file('profile_picture');
+    const user = auth.user!
+    const profilePic = request.file('profilePicture', {
+      extnames: ['jpg', 'png', 'jpeg'],
+      size: '2mb',
+    })
 
     if (!profilePic) {
-      return response.badRequest({ message: 'Profile picture is required' });
+      return response.badRequest({ message: 'Profile picture is required' })
     }
 
-    await profilePic.move('public/uploads');
+    await profilePic.move('public/uploads', {
+      name: `${new Date().getTime()}.${profilePic.extname}`,
+      overwrite: true,
+    })
 
-    user.profilePicture = `/uploads/${profilePic.fileName}` || null
-    await user.save();
+    user.profilePicture = `/uploads/${profilePic.fileName}`
+    await user.save()
 
-    return response.ok({ message: 'Profile picture updated successfully', data: user });
+    return response.ok({ message: 'Profile picture updated successfully', data: user })
   }
 
   public async destroy({ params, response }: HttpContext) {

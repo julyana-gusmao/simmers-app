@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import api from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
+import plumbob from '@utils/plumbob.png'
 
 interface User {
   id: number;
@@ -81,38 +82,47 @@ const CommentsList: React.FC<CommentsListProps> = ({ postId, updateComments, pos
   }
 
   return (
-    <div>
+    <div className='space-y-5'>
+      {comments.length ? (<h4 className='text-lg font-medium ml-2'>Comentários</h4>) : null}
       {comments.map((comment) => (
-        <div key={comment.id} className="comment">
-          <div className="comment-header flex items-center">
+        <div key={comment.id} id="comment-container" className="bg-gray-100 p-4 gap-3 rounded-md flex flex-col">
+          <div id="comment-header" className="flex gap-3 items-center">
             <img
               src={comment.user.profilePicture ? `http://localhost:3333${comment.user.profilePicture}` : 'default-avatar.png'}
               alt={`${comment.user.firstName} ${comment.user.lastName}`}
-              className="h-8 w-8 rounded-full object-cover flex-shrink-0"
+              className="h-9 w-9 rounded-full object-cover flex-shrink-0"
             />
-            <p className="ml-2">{comment.user.firstName} {comment.user.lastName}</p>
+            <div className='flex flex-col gap-1'>
+              <div className='flex gap-2'>
+                <img src={plumbob} alt='plumbob' width={10} />
+                <p className="text-sm font-medium">{comment.user.firstName} {comment.user.lastName}</p>
+              </div>
+              <small className='text-xs'>{new Date(comment.createdAt).toLocaleString()}</small>
+            </div>
           </div>
-          <small>{new Date(comment.createdAt).toLocaleString()}</small>
           {editingCommentId === comment.id ? (
-            <div>
+            <div className='space-y-2 mt-3'>
               <textarea
+                className='w-full min-h-[10vh]'
                 value={editedContent}
                 onChange={(e) => setEditedContent(e.target.value)}
               />
-              <button onClick={() => handleEditComment(comment.id)}>Salvar</button>
-              <button onClick={() => setEditingCommentId(null)}>Cancelar</button>
+              <div className='space-x-2'>
+              <button className='btn-primary hover:scale-100 text-white px-5 text-xs' onClick={() => handleEditComment(comment.id)}>Salvar</button>
+              <button className='bg-red-700 text-white rounded-md text-xs py-2 px-3' onClick={() => setEditingCommentId(null)}>Cancelar</button>
+              </div>
             </div>
           ) : (
             <p>{comment.content}</p>
           )}
           {(comment.user.id === user?.id || postAuthorId === user?.id) && (
-            <>
-              <button onClick={() => handleDelete(comment.id)}>Excluir</button>
-              <button onClick={() => {
+            <div className='space-x-2'>
+              <button className='btn-danger px-2 text-xs' onClick={() => handleDelete(comment.id)}>Excluir</button>
+              <button className='btn-edit px-2 text-xs' onClick={() => {
                 setEditingCommentId(comment.id);
                 setEditedContent(comment.content);
               }}>Editar</button>
-            </>
+            </div>
           )}
         </div>
       ))}
