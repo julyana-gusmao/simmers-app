@@ -1,8 +1,9 @@
-import type { HttpContext } from '@adonisjs/core/http'
-import User from '../models/user.js'
-import { ModelQueryBuilderContract } from '@adonisjs/lucid/types/model';
 import Follower from '#models/follower';
-import Hash from '@adonisjs/core/services/hash'
+import Post from '#models/post';
+import type { HttpContext } from '@adonisjs/core/http';
+import Hash from '@adonisjs/core/services/hash';
+import { ModelQueryBuilderContract } from '@adonisjs/lucid/types/model';
+import User from '../models/user.js';
 
 export default class UsersController {
 
@@ -17,16 +18,44 @@ export default class UsersController {
     return response.ok(users);
   }
 
+  public async getUserPosts({ params, request, response }: HttpContext) {
+    const userId = params.id;
+    const page = request.input('page', 1);
+    const limit = request.input('limit', 5);
+    const offset = (page - 1) * limit;
+
+    const posts = await Post.query()
+      .where('user_id', userId)
+      .preload('user')
+      .withCount('comments')
+      .orderBy('createdAt', 'desc')
+      .offset(offset)
+      .limit(limit);
+
+    return response.ok(posts);
+  }
+
   public async show({ params, response }: HttpContext) {
     try {
-      const user = await User.findOrFail(params.id)
-      await user.load('posts')
-      await user.load('following', (query: ModelQueryBuilderContract<typeof Follower, Follower>) => {
-        query.preload('user', (userQuery: ModelQueryBuilderContract<typeof User, User>) => {
-          userQuery.select('id', 'firstName', 'lastName', 'email', 'profilePicture');
-        });
-      });
-      return response.ok(user)
+      const user = await User.query()
+        .where('id', params.id)
+        .preload('posts', (postQuery: ModelQueryBuilderContract<typeof Post>) => {
+          postQuery.preload('user')
+          postQuery.withCount('comments')
+        })
+        .preload('followers')
+        .firstOrFail()
+
+      await user.load('following', (query: ModelQueryBuilderContract<typeof Follower>) => {
+        query.preload('user', (userQuery: ModelQueryBuilderContract<typeof User>) => {
+          userQuery.select('id', 'firstName', 'lastName', 'email', 'profilePicture')
+        })
+      })
+
+      return response.ok({
+        user,
+        followersCount: user.followers.length,
+      })
     } catch {
       return response.notFound({ message: 'User not found' })
     }
@@ -34,12 +63,13 @@ export default class UsersController {
 
   public async update({ params, request, response }: HttpContext) {
     try {
-      const user = await User.findOrFail(params.id)
-      user.merge(request.only(['firstName', 'lastName', 'birthDate', 'phone', 'email']))
-      await user.save()
-      return response.ok({ message: 'User updated successfully', data: user })
-    } catch {
-      return response.notFound({ message: 'User not found' })
+      const user = await User.findOrFail(params.id);
+      user.merge(request.only(['firstName', 'lastName', 'birthDate', 'phone', 'email']));
+      await user.save();
+      return response.ok({ message: 'User updated successfully', data: user });
+    } catch (error) {
+      console.error('Error updating user:', error);
+      return response.notFound({ message: 'User not found' });
     }
   }
 
@@ -65,21 +95,26 @@ export default class UsersController {
     return response.ok({ message: 'Password updated successfully', token });
   }
 
-
   public async updateProfilePicture({ auth, request, response }: HttpContext) {
-    const user = auth.user!;
-    const profilePic = request.file('profile_picture');
+    const user = auth.user!
+    const profilePic = request.file('profilePicture', {
+      extnames: ['jpg', 'png', 'jpeg'],
+      size: '2mb',
+    })
 
     if (!profilePic) {
-      return response.badRequest({ message: 'Profile picture is required' });
+      return response.badRequest({ message: 'Profile picture is required' })
     }
 
-    await profilePic.move('public/uploads');
+    await profilePic.move('public/uploads', {
+      name: `${new Date().getTime()}.${profilePic.extname}`,
+      overwrite: true,
+    })
 
-    user.profilePicture = `/uploads/${profilePic.fileName}` || null
-    await user.save();
+    user.profilePicture = `/uploads/${profilePic.fileName}`
+    await user.save()
 
-    return response.ok({ message: 'Profile picture updated successfully', data: user });
+    return response.ok({ message: 'Profile picture updated successfully', data: user })
   }
 
   public async destroy({ params, response }: HttpContext) {

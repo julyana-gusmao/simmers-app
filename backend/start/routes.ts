@@ -1,7 +1,7 @@
-import UsersController from '#controllers/users_controller'
-import PostsController from '#controllers/posts_controller'
 import CommentsController from '#controllers/comments_controller'
 import FollowersController from '#controllers/followers_controller'
+import PostsController from '#controllers/posts_controller'
+import UsersController from '#controllers/users_controller'
 import router from '@adonisjs/core/services/router'
 import { middleware } from './kernel.js'
 
@@ -40,6 +40,10 @@ router.group(() => {
     .as('users.show')
 
   router
+    .get('/:id/posts', [UsersController, 'getUserPosts'])
+    .as('users.posts')
+
+  router
     .put('/:id', [UsersController, 'update'])
     .as('users.update')
     .use(middleware.auth())
@@ -67,6 +71,11 @@ router.group(() => {
   router
     .get('/', [PostsController, 'index'])
     .as('posts.index')
+    .use(middleware.auth())
+
+  router
+    .get('/all', [PostsController, 'getAllPosts'])
+    .as('posts.all')
     .use(middleware.auth())
 
   router

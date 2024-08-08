@@ -1,12 +1,13 @@
+import ProfilePage from 'pages/ProfilePage';
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import Login from './pages/Login';
-import SignUp from './pages/SignUp';
 import Home from './pages/Home';
-import UsersPage from './pages/UsersPage';
-import ProfilePage from './pages/ProfilePage';
-import ProfileUpdatePage from './pages/ProfileUpdatePage';
+import Login from './pages/Auth/LoginPage';
+import PostDetails from './pages/PostDetails';
+import ExplorerPage from './pages/ExplorerPage';
+import UpdateProfilePage from 'pages/Auth/UpdateProfilePage';
+import Register from 'pages/Auth/RegisterPage';
 
 const App: React.FC = () => {
   return (
@@ -14,11 +15,13 @@ const App: React.FC = () => {
       <Router>
         <Routes>
           <Route path="/login" element={<RedirectIfLogged><Login /></RedirectIfLogged>} />
-          <Route path="/signup" element={<RedirectIfLogged><SignUp /></RedirectIfLogged>} />
+          <Route path="/signup" element={<RedirectIfLogged><Register /></RedirectIfLogged>} />
           <Route path="/" element={<PrivateRoute><Home /></PrivateRoute>} />
-          <Route path="/users" element={<PrivateRoute><UsersPage /></PrivateRoute>} />
+          <Route path="/users" element={<PrivateRoute><ExplorerPage /></PrivateRoute>} />
+          <Route path="/users/:id" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
+          <Route path="/posts/:id" element={<PrivateRoute><PostDetails /></PrivateRoute>} />
           <Route path="/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
-          <Route path="/profile/update" element={<PrivateRoute><ProfileUpdatePage /></PrivateRoute>} />
+          <Route path="/profile/edit" element={<PrivateRoute><UpdateProfilePage /></PrivateRoute>} />
         </Routes>
       </Router>
     </AuthProvider>

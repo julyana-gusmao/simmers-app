@@ -1,9 +1,0 @@
-diff a/backend/start/kernel.ts b/backend/start/kernel.ts	(rejected hunks)
-@@ -7,6 +7,7 @@ server.use([
-   () => import('#middleware/container_bindings_middleware'),
-   () => import('#middleware/force_json_response_middleware'),
-   () => import('@adonisjs/cors/cors_middleware'),
-+  () => import('@adonisjs/static/static_middleware')
- ])
- 
- router.use([
