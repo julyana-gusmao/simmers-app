@@ -7,6 +7,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
+import FollowButton from '@components/followers/FollowButton';
 
 interface User {
   id: number;
@@ -22,19 +23,30 @@ const ProfilePage: React.FC = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [followersCount, setFollowersCount] = useState<number>(0);
+  const [isFollowing, setIsFollowing] = useState<boolean>(false); 
 
   const fetchUserDetails = async (userId: number) => {
     try {
-      const response = await api.get(`/users/${userId}`);
-      setUser(response.data.user);
-      setFollowersCount(response.data.followersCount);
+      const userResponse = await api.get(`/users/${userId}`);
+      setUser(userResponse.data.user);
+      setFollowersCount(userResponse.data.followersCount);
+      const followingResponse = await api.get('/followers/following');
+      const isFollowingUser = followingResponse.data.some(
+        (follow: any) => follow.userId === userId
+      );
+      setIsFollowing(isFollowingUser);
     } catch (error) {
-      console.error('Error fetching user details:', error);
+      console.error('Error fetching user details or following state:', error);
     }
   };
 
+  const handleFollowChange = () => {
+    setIsFollowing((prev) => !prev);
+    setFollowersCount((prev) => (isFollowing ? prev - 1 : prev + 1));
+  };
+
   useEffect(() => {
-    if (id) {
+    if (id && Number(id) !== currentUser?.id) {
       fetchUserDetails(Number(id));
     } else if (currentUser) {
       fetchUserDetails(currentUser.id);
@@ -63,7 +75,13 @@ const ProfilePage: React.FC = () => {
       <header className='py-10 px-20 relative shadow-m flex gap-3 items-center bg-mediumGreen'>
         <button
           className="size-10 absolute bottom-44 left-10"
-          onClick={() => navigate('/')}
+          onClick={() => {
+            if (currentUser?.id === user.id) {
+              navigate('/');
+            } else {
+              navigate(-1);
+            }
+          }}
         >
           <img src={arrowBack} alt="Voltar" />
         </button>
@@ -79,12 +97,20 @@ const ProfilePage: React.FC = () => {
             <p className='font-medium'>{followersCount} Seguidores</p>
           </div>
         </div>
-        {currentUser?.id === user.id && (
+        {currentUser?.id === user.id ? (
           <div className='ml-auto flex flex-col gap-5 items-center'>
             <div className='space-x-5'>
               <button className='btn-edit px-5' onClick={() => navigate('/profile/edit')}>Editar Perfil</button>
               <button className='btn-danger px-5' onClick={handleLogout}>Sair</button>
             </div>
+          </div>
+        ) : (
+          <div className='ml-auto flex items-center gap-5'>
+            <FollowButton 
+              userId={user.id} 
+              isFollowing={isFollowing} 
+              onFollowChange={handleFollowChange} 
+            />
           </div>
         )}
       </header>

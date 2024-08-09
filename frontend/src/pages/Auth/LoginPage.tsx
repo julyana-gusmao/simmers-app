@@ -47,7 +47,7 @@ const Login: React.FC = () => {
             required
             onChange={(e) => setPassword(e.target.value)}
           />
-          {errorMessage && <p className="text-red-700 text-center">{errorMessage}</p>}
+          {errorMessage && <p className="text-red-800 font-bold text-center">{errorMessage}</p>}
           <button type="submit" className='btn-primary shadow-m hover:scale-110'>Entrar</button>
         </form>
         <div className='flex flex-col gap-3 items-center'>

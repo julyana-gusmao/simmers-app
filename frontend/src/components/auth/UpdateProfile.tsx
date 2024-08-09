@@ -202,7 +202,7 @@ const UpdateProfile: React.FC<UpdateProfileProps> = ({
         </div>
       </div>
       <div className='flex flex-col gap-3'>
-        {errorMessage && <p className="text-red-700 text-center">{errorMessage}</p>}
+        {errorMessage && <p className="text-red-800 font-bold text-center">{errorMessage}</p>}
         <div className="flex gap-3 mt-5">
           <button type="submit" className="btn-primary text-white px-10 py-2 rounded-md">
             Salvar Alterações

@@ -1,7 +1,5 @@
-import React, { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
 import api from './../../services/api';
-import DatePicker from 'react-datepicker';
 import SuccessModal from '@components/modal/SuccessModal';
 import Register from '@components/auth/Register';
 
@@ -14,8 +12,6 @@ const RegisterPage: React.FC = () => {
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const navigate = useNavigate();
-  const datePickerRef = useRef<DatePicker>(null);
 
   const handleSignUp = async () => {
     if (!firstName || !lastName || !birthDate || !phone || !email || !password) {

@@ -20,8 +20,8 @@ const WarningModal: React.FC<WarningModalProps> = ({ message, onConfirm, onCance
         onConfirm();
         setIsConfirmed(false);
         onCancel();
-      }, 600);
-    }, 500);
+      }, 800);
+    }, 1000);
   };
 
   return (

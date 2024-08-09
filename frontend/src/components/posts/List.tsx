@@ -2,7 +2,7 @@ import WarningModal from '@components/modal/WarningModal';
 import comment from '@utils/comment.svg';
 import defaultAvatar from '@utils/default-avatar.png';
 import editButton from '@utils/edit.svg';
-import deleteButton from '@utils/delete.svg'
+import deleteButton from '@utils/delete.svg';
 import plumbob from '@utils/plumbob.png';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -126,7 +126,12 @@ const PostList: React.FC<{ userId?: number; updatePosts?: boolean }> = ({ userId
                 />
                 <div className='flex flex-col'>
                   <div className='flex gap-2'>
-                    <h5 className="text-lg font-medium">{post.user.firstName} {post.user.lastName}</h5>
+                    <h5 
+                      className="text-lg font-medium cursor-pointer hover:underline"
+                      onClick={() => navigate(`/users/${post.user.id}`)}
+                    >
+                      {post.user.firstName} {post.user.lastName}
+                    </h5>
                     <img src={plumbob} alt='plumbob' width={15} />
                   </div>
                   <small className='font-medium'>{new Date(post.createdAt).toLocaleString()}</small>
@@ -138,11 +143,11 @@ const PostList: React.FC<{ userId?: number; updatePosts?: boolean }> = ({ userId
                       setEditingPostId(post.id);
                       setEditedContent(post.content);
                     }}>
-                    <img src={editButton} alt="Editar" width={40} />
+                      <img src={editButton} alt="Editar" width={40} />
                     </button>
                     <button onClick={() => handleDeletePost(post.id)}>
-                    <img src={deleteButton} alt="Apagar" width={40} />
-                      </button>
+                      <img src={deleteButton} alt="Apagar" width={40} />
+                    </button>
                   </div>
                 )}
               </div>

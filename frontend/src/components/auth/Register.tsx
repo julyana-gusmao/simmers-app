@@ -134,7 +134,7 @@ const Register: React.FC<RegisterProps> = ({
           </div>
         </div>
         <div className='flex flex-col gap-3'>
-          {errorMessage && <p className="text-red-700 text-center">{errorMessage}</p>}
+          {errorMessage && <p className="text-red-800 font-bold text-center">{errorMessage}</p>}
           <button onClick={handleSignUp} className='btn-secondary hover:bg-lightGreen'>Cadastrar</button>
         </div>
         <div className='flex gap-3 items-center ml-24'>

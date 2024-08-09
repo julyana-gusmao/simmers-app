@@ -15,6 +15,7 @@ interface Comment {
   id: number;
   content: string;
   createdAt: string;
+  updatedAt: string;
   user: User;
 }
 
@@ -71,7 +72,7 @@ const CommentsList: React.FC<CommentsListProps> = ({ postId, updateComments, pos
   const handleEditComment = async (commentId: number) => {
     try {
       await api.put(`/comments/${commentId}`, { content: editedContent });
-      setComments(comments.map((comment) => (comment.id === commentId ? { ...comment, content: editedContent } : comment)));
+      setComments(comments.map((comment) => (comment.id === commentId ? { ...comment, content: editedContent, updatedAt: new Date().toISOString() } : comment)));
       setEditingCommentId(null);
     } catch (error) {
       console.error('Erro ao editar comentário:', error);
@@ -99,6 +100,7 @@ const CommentsList: React.FC<CommentsListProps> = ({ postId, updateComments, pos
                 <p className="text-sm font-medium">{comment.user.firstName} {comment.user.lastName}</p>
               </div>
               <small className='text-xs'>{new Date(comment.createdAt).toLocaleString()}</small>
+              {new Date(comment.updatedAt).getTime() > new Date(comment.createdAt).getTime() && <small className='text-gray-400'>Comentário editado</small>}
             </div>
           </div>
           {editingCommentId === comment.id ? (
