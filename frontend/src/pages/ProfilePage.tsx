@@ -1,9 +1,13 @@
+import PostList from '@components/posts/List';
+import arrowBack from '@utils/arrow-back.svg';
+import defaultAvatar from '@utils/default-avatar.png';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
-import PostList from '@components/posts/List';
-import arrowBack from '@utils/arrow-back.svg';
+import FollowButton from '@components/followers/FollowButton';
 
 interface User {
   id: number;
@@ -19,19 +23,30 @@ const ProfilePage: React.FC = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [followersCount, setFollowersCount] = useState<number>(0);
+  const [isFollowing, setIsFollowing] = useState<boolean>(false); 
 
   const fetchUserDetails = async (userId: number) => {
     try {
-      const response = await api.get(`/users/${userId}`);
-      setUser(response.data.user);
-      setFollowersCount(response.data.followersCount);
+      const userResponse = await api.get(`/users/${userId}`);
+      setUser(userResponse.data.user);
+      setFollowersCount(userResponse.data.followersCount);
+      const followingResponse = await api.get('/followers/following');
+      const isFollowingUser = followingResponse.data.some(
+        (follow: any) => follow.userId === userId
+      );
+      setIsFollowing(isFollowingUser);
     } catch (error) {
-      console.error('Error fetching user details:', error);
+      console.error('Error fetching user details or following state:', error);
     }
   };
 
+  const handleFollowChange = () => {
+    setIsFollowing((prev) => !prev);
+    setFollowersCount((prev) => (isFollowing ? prev - 1 : prev + 1));
+  };
+
   useEffect(() => {
-    if (id) {
+    if (id && Number(id) !== currentUser?.id) {
       fetchUserDetails(Number(id));
     } else if (currentUser) {
       fetchUserDetails(currentUser.id);
@@ -53,23 +68,26 @@ const ProfilePage: React.FC = () => {
     return <div>Loading...</div>;
   }
 
-  const formattedBirthDate = new Date(user.birthDate).toLocaleDateString('pt-BR', {
-    day: '2-digit',
-    month: '2-digit'
-  });
+  const formattedBirthDate = format(new Date(user.birthDate), "dd 'de' MMMM", { locale: ptBR });
 
   return (
-    <div className='flex flex-col gap-2 bg-default-bg bg-cover bg-no-repeat bg-center'>
+    <div className='flex flex-col min-h-screen gap-2 bg-default-bg bg-cover bg-no-repeat bg-center'>
       <header className='py-10 px-20 relative shadow-m flex gap-3 items-center bg-mediumGreen'>
         <button
           className="size-10 absolute bottom-44 left-10"
-          onClick={() => navigate('/')}
+          onClick={() => {
+            if (currentUser?.id === user.id) {
+              navigate('/');
+            } else {
+              navigate(-1);
+            }
+          }}
         >
           <img src={arrowBack} alt="Voltar" />
         </button>
         <div className='flex items-center gap-8 ml-5'>
           <img
-            src={user.profilePicture ? `http://localhost:3333${user.profilePicture}` : 'default-avatar.png'}
+            src={user.profilePicture ? `http://localhost:3333${user.profilePicture}` : defaultAvatar}
             alt="Profile"
             className="h-40 w-40 rounded-full object-cover"
           />
@@ -79,12 +97,20 @@ const ProfilePage: React.FC = () => {
             <p className='font-medium'>{followersCount} Seguidores</p>
           </div>
         </div>
-        {currentUser?.id === user.id && (
+        {currentUser?.id === user.id ? (
           <div className='ml-auto flex flex-col gap-5 items-center'>
             <div className='space-x-5'>
               <button className='btn-edit px-5' onClick={() => navigate('/profile/edit')}>Editar Perfil</button>
               <button className='btn-danger px-5' onClick={handleLogout}>Sair</button>
             </div>
+          </div>
+        ) : (
+          <div className='ml-auto flex items-center gap-5'>
+            <FollowButton 
+              userId={user.id} 
+              isFollowing={isFollowing} 
+              onFollowChange={handleFollowChange} 
+            />
           </div>
         )}
       </header>

@@ -1,7 +1,10 @@
+import defaultAvatar from '@utils/default-avatar.png';
+import plumbob from '@utils/plumbob.png';
+import { useAuth } from 'contexts/AuthContext';
 import React, { useEffect, useState } from 'react';
 import api from '../../services/api';
-import { useAuth } from '../../contexts/AuthContext';
-import plumbob from '@utils/plumbob.png'
+import editButton from '@utils/edit.svg';
+import deleteButton from '@utils/delete.svg';
 
 interface User {
   id: number;
@@ -14,6 +17,7 @@ interface Comment {
   id: number;
   content: string;
   createdAt: string;
+  updatedAt: string;
   user: User;
 }
 
@@ -70,7 +74,7 @@ const CommentsList: React.FC<CommentsListProps> = ({ postId, updateComments, pos
   const handleEditComment = async (commentId: number) => {
     try {
       await api.put(`/comments/${commentId}`, { content: editedContent });
-      setComments(comments.map((comment) => (comment.id === commentId ? { ...comment, content: editedContent } : comment)));
+      setComments(comments.map((comment) => (comment.id === commentId ? { ...comment, content: editedContent, updatedAt: new Date().toISOString() } : comment)));
       setEditingCommentId(null);
     } catch (error) {
       console.error('Erro ao editar comentário:', error);
@@ -88,7 +92,7 @@ const CommentsList: React.FC<CommentsListProps> = ({ postId, updateComments, pos
         <div key={comment.id} id="comment-container" className="bg-gray-100 p-4 gap-3 rounded-md flex flex-col">
           <div id="comment-header" className="flex gap-3 items-center">
             <img
-              src={comment.user.profilePicture ? `http://localhost:3333${comment.user.profilePicture}` : 'default-avatar.png'}
+              src={comment.user.profilePicture ? `http://localhost:3333${comment.user.profilePicture}` : defaultAvatar}
               alt={`${comment.user.firstName} ${comment.user.lastName}`}
               className="h-9 w-9 rounded-full object-cover flex-shrink-0"
             />
@@ -98,7 +102,22 @@ const CommentsList: React.FC<CommentsListProps> = ({ postId, updateComments, pos
                 <p className="text-sm font-medium">{comment.user.firstName} {comment.user.lastName}</p>
               </div>
               <small className='text-xs'>{new Date(comment.createdAt).toLocaleString()}</small>
+              {new Date(comment.updatedAt).getTime() > new Date(comment.createdAt).getTime() && <small className='text-gray-400'>Comentário editado</small>}
             </div>
+
+            {(comment.user.id === user?.id || postAuthorId === user?.id) && (
+              <div className='space-x-1 ml-auto'>
+                <button onClick={() => {
+                  setEditingCommentId(comment.id);
+                  setEditedContent(comment.content);
+                }}>
+                  <img src={editButton} alt="Editar" width={30} />
+                </button>
+                <button onClick={() => handleDelete(comment.id)}>
+                  <img src={deleteButton} alt="Deletar" width={30} />
+                </button>
+              </div>
+            )}
           </div>
           {editingCommentId === comment.id ? (
             <div className='space-y-2 mt-3'>
@@ -108,21 +127,12 @@ const CommentsList: React.FC<CommentsListProps> = ({ postId, updateComments, pos
                 onChange={(e) => setEditedContent(e.target.value)}
               />
               <div className='space-x-2'>
-              <button className='btn-primary hover:scale-100 text-white px-5 text-xs' onClick={() => handleEditComment(comment.id)}>Salvar</button>
-              <button className='bg-red-700 text-white rounded-md text-xs py-2 px-3' onClick={() => setEditingCommentId(null)}>Cancelar</button>
+                <button className='btn-primary hover:scale-100 text-white px-5 text-xs' onClick={() => handleEditComment(comment.id)}>Salvar</button>
+                <button className='bg-red-700 text-white rounded-md text-xs py-2 px-3' onClick={() => setEditingCommentId(null)}>Cancelar</button>
               </div>
             </div>
           ) : (
             <p>{comment.content}</p>
-          )}
-          {(comment.user.id === user?.id || postAuthorId === user?.id) && (
-            <div className='space-x-2'>
-              <button className='btn-danger px-2 text-xs' onClick={() => handleDelete(comment.id)}>Excluir</button>
-              <button className='btn-edit px-2 text-xs' onClick={() => {
-                setEditingCommentId(comment.id);
-                setEditedContent(comment.content);
-              }}>Editar</button>
-            </div>
           )}
         </div>
       ))}

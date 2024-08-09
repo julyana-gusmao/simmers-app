@@ -1,10 +1,11 @@
+import arrow from '@utils/arrow.svg';
+import defaultAvatar from '@utils/default-avatar.png';
 import logotype from '@utils/logotype.png';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import PostForm from '../components/posts/Form';
 import PostList from '../components/posts/List';
 import { useAuth } from '../contexts/AuthContext';
-import arrow from '@utils/arrow.svg';
 
 const Home: React.FC = () => {
   const [updatePosts, setUpdatePosts] = useState<boolean>(false);
@@ -19,8 +20,8 @@ const Home: React.FC = () => {
   };
 
   return (
-    <section className='flex flex-col items-center bg-cas-bg bg-cover bg-no-repeat bg-center'>
-      <header className='bg-mediumGreen shadow-m fixed flex gap-5 items-center justify-between w-full h-[13vh] px-14'>
+    <section className='flex flex-col min-h-screen items-center bg-cas-bg bg-cover bg-no-repeat bg-center'>
+      <header className='bg-mediumGreen shadow-m fixed flex gap-5 items-center justify-between w-full h-[13vh] px-14 z-50'>
         <img src={logotype} alt='logotype' width="170" />
         <div id='navbar' className='flex gap-5 mr-5 items-center'>
           <Link to="/users">
@@ -34,7 +35,7 @@ const Home: React.FC = () => {
           <div className='flex items-center gap-4'>
             <Link to="/profile">
               <img
-                src={user?.profilePicture ? `http://localhost:3333${user.profilePicture}` : 'default-avatar.png'}
+                src={user?.profilePicture ? `http://localhost:3333${user.profilePicture}` : defaultAvatar}
                 alt="Profile"
                 className="h-16 w-16 rounded-full object-cover cursor-pointer"
               />

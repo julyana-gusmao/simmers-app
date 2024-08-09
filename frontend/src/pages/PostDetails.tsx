@@ -1,10 +1,14 @@
+import WarningModal from '@components/modal/WarningModal';
+import defaultAvatar from '@utils/default-avatar.png';
+import plumbob from '@utils/plumbob.png';
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import editButton from '@utils/edit.svg';
+import deleteButton from '@utils/delete.svg'
 import CommentForm from '../components/comments/Form';
 import CommentsList from '../components/comments/List';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
-import plumbob from '@utils/plumbob.png';
 
 interface Post {
   id: number;
@@ -28,6 +32,7 @@ const PostDetails: React.FC = () => {
   const [updateComments, setUpdateComments] = useState<boolean>(false);
   const [editing, setEditing] = useState<boolean>(false);
   const [editedContent, setEditedContent] = useState<string>('');
+  const [showWarningModal, setShowWarningModal] = useState<boolean>(false);
 
   const fetchPost = async () => {
     try {
@@ -56,12 +61,18 @@ const PostDetails: React.FC = () => {
   };
 
   const handleDeletePost = async () => {
+    setShowWarningModal(true);
+  };
+
+  const confirmDeletePost = async () => {
     if (!post) return;
     try {
       await api.delete(`/posts/${post.id}`);
       navigate('/');
     } catch (error) {
       console.error('Erro ao deletar o post:', error);
+    } finally {
+      setShowWarningModal(false);
     }
   };
 
@@ -83,7 +94,7 @@ const PostDetails: React.FC = () => {
         <div className='border border-black/30 px-5 py-10 flex flex-col gap-5 rounded-md mb-6'>
           <div className="post-header flex gap-3 items-center">
             <img
-              src={post.user.profilePicture ? `http://localhost:3333${post.user.profilePicture}` : 'default-avatar.png'}
+              src={post.user.profilePicture ? `http://localhost:3333${post.user.profilePicture}` : defaultAvatar}
               alt={`${post.user.firstName} ${post.user.lastName}`}
               className="h-16 w-16 rounded-full object-cover flex-shrink-0"
             />
@@ -97,6 +108,21 @@ const PostDetails: React.FC = () => {
                 <small className='text-gray-400'>Post editado</small>
               )}
             </div>
+
+            {currentUser?.id === post.user.id && !editing && (
+              <div className='flex space-x-3 ml-auto mr-2'>
+                <button onClick={() => {
+                  setEditing(true);
+                  setEditedContent(post.content);
+                }}>
+                  <img src={editButton} alt="Editar" width={40} />
+                </button>
+                <button onClick={handleDeletePost}>
+                  <img src={deleteButton} alt="Apagar" width={40} />
+                </button>
+              </div>
+            )}
+
           </div>
           <div className='bg-[#ecffee] rounded-md py-5 px-3'>
             {editing ? (
@@ -113,15 +139,6 @@ const PostDetails: React.FC = () => {
               <p>{post.content}</p>
             )}
           </div>
-          {currentUser?.id === post.user.id && !editing && (
-            <div className='flex space-x-3'>
-              <button className="btn-edit px-3" onClick={() => {
-                setEditing(true);
-                setEditedContent(post.content);
-              }}>Editar</button>
-              <button className="btn-danger px-3" onClick={handleDeletePost}>Deletar</button>
-            </div>
-          )}
         </div>
         <div className='flex flex-col gap-10'>
           <CommentForm postId={post.id} onCommentAdded={handleCommentAdded} />
@@ -134,6 +151,13 @@ const PostDetails: React.FC = () => {
       >
         Voltar
       </button>
+      {showWarningModal && (
+        <WarningModal
+          message="Apagar post?"
+          onConfirm={confirmDeletePost}
+          onCancel={() => setShowWarningModal(false)}
+        />
+      )}
     </section>
   );
 };

@@ -33,7 +33,7 @@ export default class CommentsController {
       .preload('user')
       .offset(offset)
       .limit(limit)
-      .orderBy('createdAt', 'desc');
+      .orderBy('createdAt', 'asc');
 
     return response.ok({ data: comments });
   }

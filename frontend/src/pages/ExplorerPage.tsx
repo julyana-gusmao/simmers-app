@@ -1,10 +1,11 @@
+import searchIcon from '@utils/search.svg';
+import { useAuth } from 'contexts/AuthContext';
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import FollowButton from '../components/followers/FollowButton';
-import { useAuth } from '../contexts/AuthContext';
 import PostList from '../components/posts/List';
 import api from '../services/api';
-import searchIcon from '@utils/search.svg';
+import arrowBack from '@utils/arrow-back.svg';
 
 interface User {
   id: number;
@@ -12,7 +13,7 @@ interface User {
   lastName: string;
 }
 
-const UsersPage: React.FC = () => {
+const ExplorerPage: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [following, setFollowing] = useState<number[]>([]);
   const [loadingFollowing, setLoadingFollowing] = useState<boolean>(true);
@@ -68,7 +69,10 @@ const UsersPage: React.FC = () => {
   return (
     <section className='bg-custom-bg bg-cover bg-no-repeat bg-center min-h-screen flex flex-col items-center gap-10'>
       <div className="flex flex-col items-center justify-center gap-10 w-full">
-        <div className="flex justify-between items-center w-[50vw] gap-3 pt-10 relative">
+        <div className="flex justify-center items-center w-[60vw] gap-3 pt-14 pb-4 relative">
+        <Link to="/">
+            <img src={arrowBack} alt="Voltar" width={50} className='absolute top-14 left-5'/>
+          </Link>
           <div className='flex items-center gap-3'>
             <img src={searchIcon} alt="Procurar" width={20} />
             <div className='relative'>
@@ -108,9 +112,6 @@ const UsersPage: React.FC = () => {
               )}
             </div>
           </div>
-          <Link to="/">
-            <button className='btn-edit px-7'>Página Inicial</button>
-          </Link>
         </div>
       </div>
 
@@ -122,4 +123,4 @@ const UsersPage: React.FC = () => {
   );
 };
 
-export default UsersPage;
+export default ExplorerPage;

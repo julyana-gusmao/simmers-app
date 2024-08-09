@@ -5,6 +5,10 @@ export default class AuthController {
   async register({ request }: HttpContext) {
     const data = request.only(['first_name', 'last_name', 'birth_date', 'phone', 'email', 'password', 'profile_picture'])
 
+    if (!data.profile_picture) {
+      data.profile_picture = '/images/default-avatar.png'
+    }
+    
     const user = await User.create(data)
     const token = await User.accessTokens.create(user)
 

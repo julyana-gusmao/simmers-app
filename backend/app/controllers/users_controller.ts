@@ -76,23 +76,15 @@ export default class UsersController {
   public async updatePassword({ auth, request, response }: HttpContext) {
     const user = auth.user!;
     const { currentPassword, newPassword } = request.all();
-
+  
     const passwordVerified = await Hash.verify(user.password, currentPassword);
     if (!passwordVerified) {
       return response.badRequest({ message: 'Current password is incorrect' });
     }
-
+  
     user.password = newPassword;
     await user.save();
-
-    const tokens = await User.accessTokens.all(user);
-    for (const token of tokens) {
-      await User.accessTokens.delete(user, token.identifier);
-    }
-
-    const token = await User.accessTokens.create(user);
-
-    return response.ok({ message: 'Password updated successfully', token });
+    return response.ok({ message: 'Password updated successfully' });
   }
 
   public async updateProfilePicture({ auth, request, response }: HttpContext) {
