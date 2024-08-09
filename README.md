@@ -29,6 +29,8 @@ Em futuras versões teremos:
 ✨ Opção de postagem com mídia
 <br/>
 ✨ Layout responsivo mobile
+<br/>
+✨️ Opção de ver seus seguidores e quem você está seguindo
 
 
 ## 🛠️ Guia de Instalação
@@ -36,14 +38,14 @@ Em futuras versões teremos:
 ### **Pré-requisitos**
 > Node.js (versão 14.x ou superior) <br/>
 > Algum gerenciador de pacotes do node (estarei exemplando com NPM) <br/>
-> SQLite (OBS: NENHUMA DAS CREDENCIAIS DO BANCO DE DADO ATUAL SÃO REAIS)
+> SQLite (OBS: NENHUMA DAS CREDENCIAIS DO BANCO DE DADOS ATUAL SÃO REAIS)
 <br/>
 
 
 **1. Clonar o repositório**
 ```git
-git clone https://github.com/seu-usuario/thesimssocials-app.git
-cd thesimssocials-app
+git clone https://github.com/julyana-gusmao/simmers-app
+cd simmers-app
 ```
 
 **2. Configurar o backend**
