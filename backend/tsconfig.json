@@ -5,6 +5,7 @@
     "outDir": "./build",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
+    "noUncheckedIndexedAccess": true,
     "strictPropertyInitialization": false,
     "esModuleInterop": true
   }
